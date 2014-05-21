@@ -1,4 +1,4 @@
-Game
+Tanks Game
 ====
 
-Gra QT
+Tanks game written in QT C++
