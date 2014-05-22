@@ -18,6 +18,7 @@ public:
     void move(GLfloat speed);
     GLfloat getXPos();
     GLfloat getYPos();
+    bool canMove(GLfloat speed, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
     int id;
 private:
     GLfloat xPos, yPos;

@@ -118,3 +118,10 @@ void Tank::rotateCannon(GLfloat value)
 {
     cannonRotation = (int)(cannonRotation + value)%360;
 }
+
+bool Tank::canMove(GLfloat speed, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
+{
+    GLfloat xCheck = xPos + sin(rotation*M_PI/180)*speed;
+    GLfloat yCheck = yPos + cos(rotation*M_PI/180)*speed;
+    return xCheck > (left + offset) && xCheck < (right - offset) && yCheck > (bottom + offset) && yCheck < (top - offset);
+}

@@ -12,11 +12,17 @@ MainWindow::MainWindow(QWidget *parent) :
     socket = new QTcpSocket(this);
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
     on_actionConnect_triggered();
+    timer.setSingleShot(false);
+    timer.setInterval(30);
+    connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
+    timer.start();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    while(!ui->widget->playerList.isEmpty())
+        delete ui->widget->playerList.takeFirst();
 }
 
 void MainWindow::infoReceived()
@@ -62,37 +68,90 @@ void MainWindow::infoReceived()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    QTextStream out(socket);
     switch(event->key())
     {
     case Qt::Key_Up:
-        ui->widget->playerList[playerID]->move(0.3);
-        ui->widget->updateGL();
+        if(!ui->widget->playerList[playerID]->canMove(0.3, 20, 20, -20, -20, 1.5)) return;
+        keyUp = true;
+        qDebug() << "Key UP pressed";
         break;
     case Qt::Key_Down:
-        ui->widget->playerList[playerID]->move(-0.2);
-        ui->widget->updateGL();
+        if(!ui->widget->playerList[playerID]->canMove(-0.2, 20, 20, -20, -20, 1.5)) return;
+        keyDown = true;
+        qDebug() << "Key DOWN pressed";
         break;
     case Qt::Key_Right:
-        ui->widget->playerList[playerID]->rotate(10);
-        ui->widget->updateGL();
+        keyRight = true;
+        qDebug() << "Key RIGHT pressed";
         break;
     case Qt::Key_Left:
-        ui->widget->playerList[playerID]->rotate(-10);
-        ui->widget->updateGL();
+        keyLeft = true;
+        qDebug() << "Key LEFT pressed";
         break;
     case Qt::Key_Q:
-        ui->widget->playerList[playerID]->rotateCannon(10);
-        ui->widget->updateGL();
+        keyQ = true;
+        qDebug() << "Key Q pressed";
         break;
     case Qt::Key_E:
-        ui->widget->playerList[playerID]->rotateCannon(-10);
-        ui->widget->updateGL();
+        keyE = true;
+        qDebug() << "Key E pressed";
         break;
     default:
         QMainWindow::keyPressEvent(event);
         break;
     }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    if(!event->isAutoRepeat())
+    {
+        switch(event->key())
+        {
+            case Qt::Key_Up:
+                keyUp = false;
+                qDebug() << "Key UP released";
+                break;
+            case Qt::Key_Down:
+                keyDown = false;
+                qDebug() << "Key DOWN released";
+                break;
+            case Qt::Key_Left:
+                keyLeft = false;
+                qDebug() << "Key LEFT released";
+                break;
+            case Qt::Key_Right:
+                keyRight = false;
+                qDebug() << "Key RIGHT released";
+                break;
+            case Qt::Key_Q:
+                keyQ = false;
+                qDebug() << "Key Q released";
+                break;
+            case Qt::Key_E:
+                keyE = false;
+                qDebug() << "Key E released";
+                break;
+        }
+    }
+}
+
+void MainWindow::movePlayer()
+{
+    QTextStream out(socket);
+
+    if(keyUp)
+        ui->widget->playerList[playerID]->move(0.2);
+    else if(keyDown)
+        ui->widget->playerList[playerID]->move(-0.1);
+    if(keyLeft)
+        ui->widget->playerList[playerID]->rotate(-5);
+    else if(keyRight)
+        ui->widget->playerList[playerID]->rotate(5);
+    if(keyE)
+        ui->widget->playerList[playerID]->rotateCannon(-3);
+    else if(keyQ)
+        ui->widget->playerList[playerID]->rotateCannon(3);
 
     out << QString::number(ui->widget->playerList[playerID]->id)
            + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
@@ -109,4 +168,10 @@ void MainWindow::on_actionConnect_triggered()
         QStringList data = connectionData.split(":", QString::SkipEmptyParts);
         socket->connectToHost(data[0], data[1].toInt());
     }
+}
+
+void MainWindow::onTimer()
+{
+    movePlayer();
+    ui->widget->updateGL();
 }

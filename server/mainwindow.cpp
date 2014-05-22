@@ -95,11 +95,6 @@ void MainWindow::newInfo()
             QTextStream in(clients[i]);
             QString info = in.readLine();
             QStringList infoList = info.split(" ", QString::SkipEmptyParts);
-            if(infoList[0] == "Tutaj")
-            {
-                ui->logWindow->append("Message from client: " + info);
-                return;
-            }
             int idInfo = infoList[0].toInt();
             double xInfo = infoList[1].toDouble();
             double yInfo = infoList[2].toDouble();
@@ -129,8 +124,7 @@ void MainWindow::newInfo()
 
 void MainWindow::clientDisconnect()
 {
-    int size = clients.size() - 1;
-    for(int i = size; i >= 0; --i)
+    for(int i = clients.size() - 1; i >= 0; --i)
     {
         if(clients[i]->state() == QAbstractSocket::UnconnectedState)
         {
@@ -138,11 +132,13 @@ void MainWindow::clientDisconnect()
             playersList.takeAt(i);
             clients.takeAt(i);
             ui->logWindow->append("Disconnecting client: " + QString::number(i));
-            size = clients.size() - 1;
-            for(int j = 0; j >= clients.size(); --j)
+            if(!clients.isEmpty())
             {
-                QTextStream clientOut(clients[j]);
-                clientOut << "ClientDisconnected: " + QString::number(disconnectedPlayerID) << endl;
+                for(int j = 0; j >= clients.size(); --j)
+                {
+                    QTextStream clientOut(clients[j]);
+                    clientOut << "ClientDisconnected: " + QString::number(disconnectedPlayerID) << endl;
+                }
             }
         }
     }

@@ -7,6 +7,7 @@
 #include <QInputDialog>
 #include <QTimer>
 #include <QDir>
+#include <QDebug>
 
 namespace Ui {
 class MainWindow;
@@ -20,14 +21,19 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
 private slots:
     void on_actionConnect_triggered();
     void infoReceived();
+    void onTimer();
 private:
+    void movePlayer();
+    QTimer timer;
     Ui::MainWindow *ui;
     int playerID;
     QTcpSocket *socket;
+    bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE;
 };
 
 #endif // MAINWINDOW_H
