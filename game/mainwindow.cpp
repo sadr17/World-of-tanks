@@ -12,10 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     socket = new QTcpSocket(this);
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
     on_actionConnect_triggered();
-    timer.setSingleShot(false);
-    timer.setInterval(30);
-    connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
-    timer.start();
+    this->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -66,98 +63,28 @@ void MainWindow::infoReceived()
     ui->widget->updateGL();
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    switch(event->key())
-    {
-    case Qt::Key_Up:
-        if(!ui->widget->playerList[playerID]->canMove(0.3, 20, 20, -20, -20, 1.5)) return;
-        keyUp = true;
-        qDebug() << "Key UP pressed";
-        break;
-    case Qt::Key_Down:
-        if(!ui->widget->playerList[playerID]->canMove(-0.2, 20, 20, -20, -20, 1.5)) return;
-        keyDown = true;
-        qDebug() << "Key DOWN pressed";
-        break;
-    case Qt::Key_Right:
-        keyRight = true;
-        qDebug() << "Key RIGHT pressed";
-        break;
-    case Qt::Key_Left:
-        keyLeft = true;
-        qDebug() << "Key LEFT pressed";
-        break;
-    case Qt::Key_Q:
-        keyQ = true;
-        qDebug() << "Key Q pressed";
-        break;
-    case Qt::Key_E:
-        keyE = true;
-        qDebug() << "Key E pressed";
-        break;
-    default:
-        QMainWindow::keyPressEvent(event);
-        break;
-    }
-}
+//void MainWindow::movePlayer()
+//{
+//    QTextStream out(socket);
 
-void MainWindow::keyReleaseEvent(QKeyEvent *event)
-{
-    if(!event->isAutoRepeat())
-    {
-        switch(event->key())
-        {
-            case Qt::Key_Up:
-                keyUp = false;
-                qDebug() << "Key UP released";
-                break;
-            case Qt::Key_Down:
-                keyDown = false;
-                qDebug() << "Key DOWN released";
-                break;
-            case Qt::Key_Left:
-                keyLeft = false;
-                qDebug() << "Key LEFT released";
-                break;
-            case Qt::Key_Right:
-                keyRight = false;
-                qDebug() << "Key RIGHT released";
-                break;
-            case Qt::Key_Q:
-                keyQ = false;
-                qDebug() << "Key Q released";
-                break;
-            case Qt::Key_E:
-                keyE = false;
-                qDebug() << "Key E released";
-                break;
-        }
-    }
-}
+//    if(keyUp)
+//        ui->widget->playerList[playerID]->move(0.2);
+//    else if(keyDown)
+//        ui->widget->playerList[playerID]->move(-0.1);
+//    if(keyLeft)
+//        ui->widget->playerList[playerID]->rotate(-5);
+//    else if(keyRight)
+//        ui->widget->playerList[playerID]->rotate(5);
+//    if(keyE)
+//        ui->widget->playerList[playerID]->rotateCannon(-3);
+//    else if(keyQ)
+//        ui->widget->playerList[playerID]->rotateCannon(3);
 
-void MainWindow::movePlayer()
-{
-    QTextStream out(socket);
-
-    if(keyUp)
-        ui->widget->playerList[playerID]->move(0.2);
-    else if(keyDown)
-        ui->widget->playerList[playerID]->move(-0.1);
-    if(keyLeft)
-        ui->widget->playerList[playerID]->rotate(-5);
-    else if(keyRight)
-        ui->widget->playerList[playerID]->rotate(5);
-    if(keyE)
-        ui->widget->playerList[playerID]->rotateCannon(-3);
-    else if(keyQ)
-        ui->widget->playerList[playerID]->rotateCannon(3);
-
-    out << QString::number(ui->widget->playerList[playerID]->id)
-           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
-}
+//    out << QString::number(ui->widget->playerList[playerID]->id)
+//           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
+//           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
+//           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
+//}
 
 void MainWindow::on_actionConnect_triggered()
 {
@@ -170,8 +97,28 @@ void MainWindow::on_actionConnect_triggered()
     }
 }
 
-void MainWindow::onTimer()
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
-    movePlayer();
+    if(event->type() == QEvent::KeyPress)
+    {
+        pressedKeys += ((QKeyEvent*)event)->key();
+        if(pressedKeys.contains(Qt::Key_Up))
+            ui->widget->playerList[playerID]->move(0.2);
+        if(pressedKeys.contains(Qt::Key_Left))
+        {
+            ui->widget->playerList[playerID]->rotate(-3);
+        }
+    }
+    else if(event->type() == QEvent::KeyRelease)
+    {
+        pressedKeys -= ((QKeyEvent*)event)->key();
+        if(pressedKeys.contains(Qt::Key_Up))
+            ui->widget->playerList[playerID]->move(0.2);
+        if(pressedKeys.contains(Qt::Key_Left))
+        {
+            ui->widget->playerList[playerID]->rotate(-3);
+        }
+    }
     ui->widget->updateGL();
+    return false;
 }

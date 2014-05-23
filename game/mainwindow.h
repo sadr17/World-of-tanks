@@ -20,17 +20,14 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void keyPressEvent(QKeyEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
+    bool eventFilter(QObject *object, QEvent *event);
 
 private slots:
     void on_actionConnect_triggered();
     void infoReceived();
-    void onTimer();
 private:
-    void movePlayer();
-    QTimer timer;
     Ui::MainWindow *ui;
+    QSet<int> pressedKeys;
     int playerID;
     QTcpSocket *socket;
     bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE;
