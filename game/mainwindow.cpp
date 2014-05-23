@@ -12,7 +12,12 @@ MainWindow::MainWindow(QWidget *parent) :
     socket = new QTcpSocket(this);
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
     on_actionConnect_triggered();
-    this->installEventFilter(this);
+//    this->installEventFilter(this);
+    keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = false;
+    timer.setSingleShot(false);
+    timer.setInterval(30);
+    connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
+    timer.start();
 }
 
 MainWindow::~MainWindow()
@@ -63,28 +68,71 @@ void MainWindow::infoReceived()
     ui->widget->updateGL();
 }
 
-//void MainWindow::movePlayer()
-//{
-//    QTextStream out(socket);
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key())
+    {
+        case Qt::Key_Up:
+            keyUp = true;
+            break;
+        case Qt::Key_Down:
+            keyDown = true;
+            break;
+        case Qt::Key_Left:
+            keyLeft = true;
+            break;
+        case Qt::Key_Right:
+            keyRight = true;
+            break;
+        case Qt::Key_E:
+            keyE = true;
+            break;
+        case Qt::Key_Q:
+            keyQ = true;
+            break;
+    }
+}
 
-//    if(keyUp)
-//        ui->widget->playerList[playerID]->move(0.2);
-//    else if(keyDown)
-//        ui->widget->playerList[playerID]->move(-0.1);
-//    if(keyLeft)
-//        ui->widget->playerList[playerID]->rotate(-5);
-//    else if(keyRight)
-//        ui->widget->playerList[playerID]->rotate(5);
-//    if(keyE)
-//        ui->widget->playerList[playerID]->rotateCannon(-3);
-//    else if(keyQ)
-//        ui->widget->playerList[playerID]->rotateCannon(3);
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    switch(event->key())
+    {
+        case Qt::Key_Up:
+            keyUp = false;
+            break;
+        case Qt::Key_Down:
+            keyDown = false;
+            break;
+        case Qt::Key_Left:
+            keyLeft = false;
+            break;
+        case Qt::Key_Right:
+            keyRight = false;
+            break;
+        case Qt::Key_E:
+            keyE = false;
+            break;
+        case Qt::Key_Q:
+            keyQ = false;
+            break;
+    }
+}
 
-//    out << QString::number(ui->widget->playerList[playerID]->id)
-//           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
-//           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
-//           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
-//}
+void MainWindow::movePlayer()
+{
+    if(keyUp)
+        ui->widget->playerList[playerID]->move(0.2);
+    else if(keyDown)
+        ui->widget->playerList[playerID]->move(-0.1);
+    if(keyLeft)
+        ui->widget->playerList[playerID]->rotate(-5);
+    else if(keyRight)
+        ui->widget->playerList[playerID]->rotate(5);
+    if(keyE)
+        ui->widget->playerList[playerID]->rotateCannon(-3);
+    else if(keyQ)
+        ui->widget->playerList[playerID]->rotateCannon(3);
+}
 
 void MainWindow::on_actionConnect_triggered()
 {
@@ -97,28 +145,39 @@ void MainWindow::on_actionConnect_triggered()
     }
 }
 
-bool MainWindow::eventFilter(QObject *object, QEvent *event)
+void MainWindow::onTimer()
 {
-    if(event->type() == QEvent::KeyPress)
-    {
-        pressedKeys += ((QKeyEvent*)event)->key();
-        if(pressedKeys.contains(Qt::Key_Up))
-            ui->widget->playerList[playerID]->move(0.2);
-        if(pressedKeys.contains(Qt::Key_Left))
-        {
-            ui->widget->playerList[playerID]->rotate(-3);
-        }
-    }
-    else if(event->type() == QEvent::KeyRelease)
-    {
-        pressedKeys -= ((QKeyEvent*)event)->key();
-        if(pressedKeys.contains(Qt::Key_Up))
-            ui->widget->playerList[playerID]->move(0.2);
-        if(pressedKeys.contains(Qt::Key_Left))
-        {
-            ui->widget->playerList[playerID]->rotate(-3);
-        }
-    }
+    movePlayer();
+    QTextStream out(socket);
+    out << QString::number(ui->widget->playerList[playerID]->id)
+           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
+           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
+           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
     ui->widget->updateGL();
-    return false;
 }
+
+//bool MainWindow::eventFilter(QObject *object, QEvent *event)
+//{
+//    if(event->type() == QEvent::KeyPress)
+//    {
+//        pressedKeys += ((QKeyEvent*)event)->key();
+//        if(pressedKeys.contains(Qt::Key_Up))
+//            ui->widget->playerList[playerID]->move(0.2);
+//        if(pressedKeys.contains(Qt::Key_Left))
+//        {
+//            ui->widget->playerList[playerID]->rotate(-3);
+//        }
+//    }
+//    else if(event->type() == QEvent::KeyRelease)
+//    {
+//        pressedKeys -= ((QKeyEvent*)event)->key();
+//        if(pressedKeys.contains(Qt::Key_Up))
+//            ui->widget->playerList[playerID]->move(0.2);
+//        if(pressedKeys.contains(Qt::Key_Left))
+//        {
+//            ui->widget->playerList[playerID]->rotate(-3);
+//        }
+//    }
+//    ui->widget->updateGL();
+//    return false;
+//}
