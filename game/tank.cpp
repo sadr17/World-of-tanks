@@ -113,6 +113,11 @@ GLfloat Tank::getCannonRotation()
     return cannonRotation;
 }
 
+void Tank::setCannonRotation(GLfloat value)
+{
+    cannonRotation = value;
+}
+
 void Tank::rotateCannon(GLfloat value)
 {
     cannonRotation = (int)(cannonRotation + value)%360;

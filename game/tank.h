@@ -10,6 +10,7 @@ public:
     Tank(int i);
     void print();
     void setRotation(GLfloat value);
+    void setCannonRotation(GLfloat value);
     void rotate(GLfloat value);
     void rotateCannon(GLfloat value);
     void setPos(GLfloat x, GLfloat y);

@@ -64,7 +64,8 @@ void MainWindow::newConnection()
                 QString message = QString::number(playersList[i]->id) + " " +
                                   QString::number(playersList[i]->getXPos()) + " " +
                                   QString::number(playersList[i]->getYPos()) + " " +
-                                  QString::number(playersList[i]->getRotation());
+                                  QString::number(playersList[i]->getRotation()) + " " +
+                                  QString::number(playersList[i]->getCannonRotation());
                 ui->logWindow->append("Message about online players sent to client " + QString::number(listSize) + ": " + message);
                 out << message << endl;
             }
@@ -76,7 +77,8 @@ void MainWindow::newConnection()
                                   QString::number(playersList[listSize]->id) + " " +
                                   QString::number(playersList[listSize]->getXPos()) + " " +
                                   QString::number(playersList[listSize]->getYPos()) + " " +
-                                  QString::number(playersList[listSize]->getRotation());
+                                  QString::number(playersList[listSize]->getRotation()) + " " +
+                                  QString::number(playersList[listSize]->getCannonRotation());
                 ui->logWindow->append("Message about new player sent to client " + QString::number(i) + ": " + message);
                 clientsOut << message << endl;
             }
@@ -101,6 +103,8 @@ void MainWindow::newInfo()
             playersList[idInfo]->setPos(xInfo, yInfo);
             double rotInfo = infoList[3].toDouble();
             playersList[idInfo]->setRotation(rotInfo);
+            double cannonRotInfo = infoList[4].toDouble();
+            playersList[idInfo]->setCannonRotation(cannonRotInfo);
             ui->logWindow->append("Info received: " + info);
             qDebug() << "Info from client " + QString::number(i) + ": " + info;
             for(int j = 0; j < clients.size(); ++j)
@@ -113,7 +117,8 @@ void MainWindow::newInfo()
                         QString message = QString::number(playersList[k]->id) + " " +
                                           QString::number(playersList[k]->getXPos()) + " " +
                                           QString::number(playersList[k]->getYPos()) + " " +
-                                          QString::number(playersList[k]->getRotation());
+                                          QString::number(playersList[k]->getRotation()) + " " +
+                                          QString::number(playersList[k]->getCannonRotation());
                         ui->logWindow->append("Message to client " + QString::number(j) + ": " + message);
                         out << message << endl;
                     }

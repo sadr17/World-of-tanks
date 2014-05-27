@@ -34,6 +34,7 @@ void Display::paintGL()
     {
         playerList[i]->print();
     }
+
 }
 
 Display::~Display()

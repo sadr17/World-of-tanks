@@ -52,8 +52,10 @@ void MainWindow::infoReceived()
             GLfloat xPosInfo = (GLfloat)info[2].toDouble();
             GLfloat yPosInfo = (GLfloat)info[3].toDouble();
             GLfloat rotInfo = (GLfloat)info[4].toDouble();
+            GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
             ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
             ui->widget->playerList[idInfo]->setRotation(rotInfo);
+            ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
             break;
         }
         else if(info[0] == "PlayersOnline:")
@@ -85,8 +87,10 @@ void MainWindow::infoReceived()
             GLfloat xPosInfo = (GLfloat)info[1].toDouble();
             GLfloat yPosInfo = (GLfloat)info[2].toDouble();
             GLfloat rotInfo = (GLfloat)info[3].toDouble();
+            GLfloat cannonRotInfo = (GLfloat)info[4].toDouble();
             ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
             ui->widget->playerList[idInfo]->setRotation(rotInfo);
+            ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
         }
     }
     ui->widget->updateGL();
@@ -169,7 +173,8 @@ void MainWindow::movePlayer()
     out << QString::number(ui->widget->playerList[playerID]->id)
            + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
            + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
+           + " " + QString::number(ui->widget->playerList[playerID]->getRotation())
+           + " " + QString::number(ui->widget->playerList[playerID]->getCannonRotation()) << endl;
 }
 
 void MainWindow::on_actionConnect_triggered()
@@ -183,7 +188,7 @@ void MainWindow::on_actionConnect_triggered()
     }
     else
     {
-        exit(-1);
+        exit(0);
     }
 }
 
