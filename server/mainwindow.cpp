@@ -102,6 +102,7 @@ void MainWindow::newInfo()
             double rotInfo = infoList[3].toDouble();
             playersList[idInfo]->setRotation(rotInfo);
             ui->logWindow->append("Info received: " + info);
+            qDebug() << "Info from client " + QString::number(i) + ": " + info;
             for(int j = 0; j < clients.size(); ++j)
             {
                 if(clients[j]->isWritable())
@@ -131,15 +132,31 @@ void MainWindow::clientDisconnect()
             int disconnectedPlayerID = playersList[i]->id;
             playersList.takeAt(i);
             clients.takeAt(i);
+            qDebug() << "Deleted player id: " + QString::number(i);
             ui->logWindow->append("Disconnecting client: " + QString::number(i));
+            ui->logWindow->append("Client ID: " + QString::number(disconnectedPlayerID));
             if(!clients.isEmpty())
             {
-                for(int j = 0; j >= clients.size(); --j)
+                qDebug() << "Players list not empty";
+                qDebug() << "Clients list size: " + QString::number(clients.size());
+                for(int j = clients.size() - 1; j >= 0; --j)
                 {
-                    QTextStream clientOut(clients[j]);
-                    clientOut << "ClientDisconnected: " + QString::number(disconnectedPlayerID) << endl;
+                    qDebug() << "Inside clients dc message loop";
+                    if(clients[j]->isWritable())
+                    {
+                        if(playersList[j]->id > disconnectedPlayerID)
+                        {
+                            qDebug() << "OLD ID: " + QString::number(playersList[j]->id);
+                            playersList[j]->id = playersList[j]->id - 1;
+                            qDebug() << "NEW ID: " + QString::number(playersList[j]->id);
+                        }
+                        QTextStream clientOut(clients[j]);
+                        qDebug() << "Sending message about dc client to client: " + QString::number(j);
+                        clientOut << "ClientDisconnected: " + QString::number(disconnectedPlayerID) << endl;
+                    }
                 }
             }
+            break;
         }
     }
 }

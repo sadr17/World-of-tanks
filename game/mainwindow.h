@@ -24,15 +24,19 @@ public:
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
 
+signals:
+    void keySignal();
+
 private slots:
     void on_actionConnect_triggered();
     void infoReceived();
     void onTimer();
+    void keySlot();
 private:
     Ui::MainWindow *ui;
     QTimer timer;
+    bool moved;
     void movePlayer();
-    QSet<int> pressedKeys;
     int playerID;
     QTcpSocket *socket;
     bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE;

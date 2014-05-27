@@ -12,7 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
     socket = new QTcpSocket(this);
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
     on_actionConnect_triggered();
-//    this->installEventFilter(this);
+    connect(this,SIGNAL(keySignal()),this,SLOT(keySlot()));
+    moved = false;
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = false;
     timer.setSingleShot(false);
     timer.setInterval(30);
@@ -27,14 +28,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::keySlot()
+{
+
+}
+
 void MainWindow::infoReceived()
 {
+    qDebug() << "Start infoReceived() method";
     QTextStream in(socket);
     int listSize = ui->widget->playerList.size();
     if(ui->widget->playerList.isEmpty()) listSize = 1;
     for(int i = 0; i < listSize; ++i)
     {
         QString message = in.readLine();
+        qDebug() << "Got message: " + message;
+        if(message.isEmpty()) break;
         QStringList info = message.split(" ", QString::SkipEmptyParts);
         if(info[0] == "NewPlayer:")
         {
@@ -55,6 +64,21 @@ void MainWindow::infoReceived()
                 ui->widget->playerList.append(new Tank(i));
             }
         }
+        else if(info[0] == "ClientDisconnected:")
+        {
+            qDebug() << "Getting message from client";
+            int idInfo = info[1].toInt();
+            ui->widget->playerList.takeAt(idInfo);
+            if(playerID > idInfo)
+            {
+                qDebug() << "minus ID";
+                playerID--;
+                qDebug() << "ID: " + QString::number(playerID);
+                ui->widget->playerList[playerID]->id--;
+            }
+            qDebug() << "Done disconnected";
+            break;
+        }
         else
         {
             int idInfo = info[0].toInt();
@@ -65,6 +89,7 @@ void MainWindow::infoReceived()
             ui->widget->playerList[idInfo]->setRotation(rotInfo);
         }
     }
+    ui->widget->updateGL();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -90,6 +115,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             keyQ = true;
             break;
     }
+    moved = true;
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
@@ -119,15 +145,16 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::movePlayer()
 {
+    qDebug() << "Moving player: " + QString::number(playerID);
     if(keyUp)
     {
         if(ui->widget->playerList[playerID]->canMove(0.2, 20, 20, -20, -20, 1.5))
-            ui->widget->playerList[playerID]->move(0.2);
+            ui->widget->playerList[playerID]->move(0.3);
     }
     else if(keyDown)
     {
         if(ui->widget->playerList[playerID]->canMove(-0.1, 20, 20, -20, -20, 1.5))
-            ui->widget->playerList[playerID]->move(-0.1);
+            ui->widget->playerList[playerID]->move(-0.2);
     }
     if(keyLeft)
         ui->widget->playerList[playerID]->rotate(-5);
@@ -154,36 +181,18 @@ void MainWindow::on_actionConnect_triggered()
         QStringList data = connectionData.split(":", QString::SkipEmptyParts);
         socket->connectToHost(data[0], data[1].toInt());
     }
+    else
+    {
+        exit(-1);
+    }
 }
 
 void MainWindow::onTimer()
 {
-    movePlayer();
-    ui->widget->updateGL();
+    if(moved)
+    {
+        movePlayer();
+        moved = false;
+        ui->widget->updateGL();
+    }
 }
-
-//bool MainWindow::eventFilter(QObject *object, QEvent *event)
-//{
-//    if(event->type() == QEvent::KeyPress)
-//    {
-//        pressedKeys += ((QKeyEvent*)event)->key();
-//        if(pressedKeys.contains(Qt::Key_Up))
-//            ui->widget->playerList[playerID]->move(0.2);
-//        if(pressedKeys.contains(Qt::Key_Left))
-//        {
-//            ui->widget->playerList[playerID]->rotate(-3);
-//        }
-//    }
-//    else if(event->type() == QEvent::KeyRelease)
-//    {
-//        pressedKeys -= ((QKeyEvent*)event)->key();
-//        if(pressedKeys.contains(Qt::Key_Up))
-//            ui->widget->playerList[playerID]->move(0.2);
-//        if(pressedKeys.contains(Qt::Key_Left))
-//        {
-//            ui->widget->playerList[playerID]->rotate(-3);
-//        }
-//    }
-//    ui->widget->updateGL();
-//    return false;
-//}
