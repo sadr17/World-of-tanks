@@ -22,9 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete ui;
     while(!ui->widget->playerList.isEmpty())
         delete ui->widget->playerList.takeFirst();
+    delete ui;
 }
 
 void MainWindow::infoReceived()
@@ -65,7 +65,6 @@ void MainWindow::infoReceived()
             ui->widget->playerList[idInfo]->setRotation(rotInfo);
         }
     }
-    ui->widget->updateGL();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -121,9 +120,15 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 void MainWindow::movePlayer()
 {
     if(keyUp)
-        ui->widget->playerList[playerID]->move(0.2);
+    {
+        if(ui->widget->playerList[playerID]->canMove(0.2, 20, 20, -20, -20, 1.5))
+            ui->widget->playerList[playerID]->move(0.2);
+    }
     else if(keyDown)
-        ui->widget->playerList[playerID]->move(-0.1);
+    {
+        if(ui->widget->playerList[playerID]->canMove(-0.1, 20, 20, -20, -20, 1.5))
+            ui->widget->playerList[playerID]->move(-0.1);
+    }
     if(keyLeft)
         ui->widget->playerList[playerID]->rotate(-5);
     else if(keyRight)
@@ -132,6 +137,12 @@ void MainWindow::movePlayer()
         ui->widget->playerList[playerID]->rotateCannon(-3);
     else if(keyQ)
         ui->widget->playerList[playerID]->rotateCannon(3);
+
+    QTextStream out(socket);
+    out << QString::number(ui->widget->playerList[playerID]->id)
+           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
+           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
+           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
 }
 
 void MainWindow::on_actionConnect_triggered()
@@ -148,11 +159,6 @@ void MainWindow::on_actionConnect_triggered()
 void MainWindow::onTimer()
 {
     movePlayer();
-    QTextStream out(socket);
-    out << QString::number(ui->widget->playerList[playerID]->id)
-           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getRotation()) << endl;
     ui->widget->updateGL();
 }
 

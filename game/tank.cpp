@@ -36,7 +36,6 @@ Tank::Tank(int i)
 
 void Tank::print()
 {
-
         glPushMatrix();
             glTranslatef(xPos,yPos,0);
             glRotatef(-rotation,0,0,1);
