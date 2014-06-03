@@ -66,3 +66,21 @@ bool Missile::canMove(GLfloat top, GLfloat right, GLfloat bottom, GLfloat left)
     GLfloat yCheck = yPos + cos(angle*M_PI/180)*speed;
     return xCheck > left && xCheck < right && yCheck > bottom && yCheck < top;
 }
+
+int Missile::hit(QList<Tank *> *tanksList)
+{
+    GLfloat radius = 1.2;
+    GLfloat missileRadius = 0.2;
+    for(int i = 0; i < tanksList->size(); ++i)
+    {
+        if(i != tankID)
+        {
+            GLfloat xVector = xPos - tanksList->at(i)->getXPos();
+            GLfloat yVector = yPos - tanksList->at(i)->getYPos();
+            GLfloat vector = sqrt(xVector*xVector + yVector*yVector);
+            if(vector <= radius + missileRadius)
+                return i;
+        }
+    }
+    return -1;
+}

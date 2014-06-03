@@ -2,6 +2,7 @@
 #define MISSILE_H
 #include <QGLWidget>
 #include <math.h>
+#include "tank.h"
 
 class Missile
 {
@@ -14,6 +15,7 @@ public:
     void setYPos(GLfloat value);
     int tankID;
     void move();
+    int hit(QList<Tank *> *tanksList);
     bool canMove(GLfloat top, GLfloat right, GLfloat bottom, GLfloat left);
     void print();
 private:

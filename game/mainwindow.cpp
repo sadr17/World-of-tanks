@@ -199,6 +199,13 @@ void MainWindow::onTimer()
     }
     for(int i = ui->widget->missileList.size() - 1; i >= 0; --i)
     {
+        int tankHit = ui->widget->missileList[i]->hit(&ui->widget->playerList);
+        if(tankHit >= 0)
+        {
+            ui->widget->playerList[tankHit]->setPos(0, 0);
+            delete ui->widget->missileList.takeAt(i);
+            continue;
+        }
         if(ui->widget->missileList[i]->canMove(20, 20, -20, -20))
             ui->widget->missileList[i]->move();
         else
