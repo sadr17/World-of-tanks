@@ -34,6 +34,10 @@ void Display::paintGL()
     {
         playerList[i]->print();
     }
+    for(int i = 0; i < missileList.size(); ++i)
+    {
+        missileList[i]->print();
+    }
 
 }
 
@@ -41,4 +45,6 @@ Display::~Display()
 {
     while(!playerList.isEmpty())
         delete playerList.takeFirst();
+    while(!missileList.isEmpty())
+        delete missileList.takeFirst();
 }

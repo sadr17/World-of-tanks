@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include "tank.h"
+#include "missile.h"
 
 class Display : public QGLWidget
 {
@@ -10,6 +11,7 @@ class Display : public QGLWidget
 public:
     explicit Display(QWidget *parent = 0);
     QList<Tank *> playerList;
+    QList<Missile *> missileList;
     ~Display();
 private:
     void paintGL();

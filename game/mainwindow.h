@@ -25,13 +25,11 @@ public:
     void keyReleaseEvent(QKeyEvent* event);
 
 signals:
-    void keySignal();
 
 private slots:
     void on_actionConnect_triggered();
     void infoReceived();
     void onTimer();
-    void keySlot();
 private:
     Ui::MainWindow *ui;
     QTimer timer;

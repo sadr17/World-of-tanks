@@ -12,7 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
     socket = new QTcpSocket(this);
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
     on_actionConnect_triggered();
-    connect(this,SIGNAL(keySignal()),this,SLOT(keySlot()));
     moved = false;
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = false;
     timer.setSingleShot(false);
@@ -28,21 +27,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::keySlot()
-{
-
-}
-
 void MainWindow::infoReceived()
 {
-    qDebug() << "Start infoReceived() method";
     QTextStream in(socket);
     int listSize = ui->widget->playerList.size();
     if(ui->widget->playerList.isEmpty()) listSize = 1;
     for(int i = 0; i < listSize; ++i)
     {
         QString message = in.readLine();
-        qDebug() << "Got message: " + message;
         if(message.isEmpty()) break;
         QStringList info = message.split(" ", QString::SkipEmptyParts);
         if(info[0] == "NewPlayer:")
@@ -68,17 +60,13 @@ void MainWindow::infoReceived()
         }
         else if(info[0] == "ClientDisconnected:")
         {
-            qDebug() << "Getting message from client";
             int idInfo = info[1].toInt();
-            ui->widget->playerList.takeAt(idInfo);
+            delete ui->widget->playerList.takeAt(idInfo);
             if(playerID > idInfo)
             {
-                qDebug() << "minus ID";
                 playerID--;
-                qDebug() << "ID: " + QString::number(playerID);
                 ui->widget->playerList[playerID]->id--;
             }
-            qDebug() << "Done disconnected";
             break;
         }
         else
@@ -118,6 +106,17 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Q:
             keyQ = true;
             break;
+        case Qt::Key_Space:
+        if(ui->widget->playerList[playerID]->hasAmmo())
+        {
+            ui->widget->missileList.append(new Missile(playerID,
+                                                       ui->widget->playerList[playerID]->getXPos(),
+                                                       ui->widget->playerList[playerID]->getYPos(),
+                                                       ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation()));
+            ui->widget->playerList[playerID]->takeAmmo(1);
+            moved = false;
+            return;
+        }
     }
     moved = true;
 }
@@ -149,15 +148,14 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::movePlayer()
 {
-    qDebug() << "Moving player: " + QString::number(playerID);
     if(keyUp)
     {
-        if(ui->widget->playerList[playerID]->canMove(0.2, 20, 20, -20, -20, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(0.2, &ui->widget->playerList, 20, 20, -20, -20, 1.5))
             ui->widget->playerList[playerID]->move(0.3);
     }
     else if(keyDown)
     {
-        if(ui->widget->playerList[playerID]->canMove(-0.1, 20, 20, -20, -20, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(-0.1, &ui->widget->playerList, 20, 20, -20, -20, 1.5))
             ui->widget->playerList[playerID]->move(-0.2);
     }
     if(keyLeft)
@@ -198,6 +196,13 @@ void MainWindow::onTimer()
     {
         movePlayer();
         moved = false;
-        ui->widget->updateGL();
     }
+    for(int i = ui->widget->missileList.size() - 1; i >= 0; --i)
+    {
+        if(ui->widget->missileList[i]->canMove(20, 20, -20, -20))
+            ui->widget->missileList[i]->move();
+        else
+            delete ui->widget->missileList.takeAt(i);
+    }
+    ui->widget->updateGL();
 }

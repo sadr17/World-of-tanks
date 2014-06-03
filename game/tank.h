@@ -19,10 +19,13 @@ public:
     void move(GLfloat speed);
     GLfloat getXPos();
     GLfloat getYPos();
-    bool canMove(GLfloat speed, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
+    bool hasAmmo();
+    void takeAmmo(int value);
+    bool canMove(GLfloat speed,QList<Tank *> *tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
     int id;
 private:
     GLfloat xPos, yPos;
+    int ammo;
     GLfloat color[4], cannonColor[4];
     GLfloat rotation, cannonRotation;
 };

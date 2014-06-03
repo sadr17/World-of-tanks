@@ -15,6 +15,7 @@ Tank::Tank()
     xPos = 0;
     yPos = 0;
     cannonRotation = 0;
+    ammo = 50;
 }
 
 Tank::Tank(int i)
@@ -32,6 +33,7 @@ Tank::Tank(int i)
     cannonRotation = 0;
     xPos = 0;
     yPos = 0;
+    ammo = 50;
 }
 
 void Tank::print()
@@ -123,9 +125,34 @@ void Tank::rotateCannon(GLfloat value)
     cannonRotation = (int)(cannonRotation + value)%360;
 }
 
-bool Tank::canMove(GLfloat speed, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
+bool Tank::canMove(GLfloat speed, QList<Tank *> *tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
 {
     GLfloat xCheck = xPos + sin(rotation*M_PI/180)*speed;
     GLfloat yCheck = yPos + cos(rotation*M_PI/180)*speed;
+    for(int i = 0; i < tanksList->size(); ++i)
+    {
+        if(i != id)
+        {
+            GLfloat othersTankUp = tanksList->at(i)->getYPos() + 1.2;
+            GLfloat othersTankBottom = tanksList->at(i)->getYPos() - 1.2;
+            GLfloat othersTankLeft = tanksList->at(i)->getXPos() - 1.0;
+            GLfloat othersTankRight = tanksList->at(i)->getXPos() + 1.0;
+            if(xCheck + 1.0 == othersTankRight || xCheck - 1.0 == othersTankLeft || yCheck + 1.2 == othersTankUp || yCheck - 1.2 == othersTankBottom)
+                return false;
+        }
+    }
     return xCheck > (left + offset) && xCheck < (right - offset) && yCheck > (bottom + offset) && yCheck < (top - offset);
+}
+
+bool Tank::hasAmmo()
+{
+    if(ammo > 0)
+        return true;
+    else
+        return false;
+}
+
+void Tank::takeAmmo(int value)
+{
+    ammo -= value;
 }
