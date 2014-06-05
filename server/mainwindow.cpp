@@ -96,17 +96,27 @@ void MainWindow::newInfo()
         {
             QTextStream in(clients[i]);
             QString info = in.readLine();
-            QStringList infoList = info.split(" ", QString::SkipEmptyParts);
-            int idInfo = infoList[0].toInt();
-            double xInfo = infoList[1].toDouble();
-            double yInfo = infoList[2].toDouble();
-            playersList[idInfo]->setPos(xInfo, yInfo);
-            double rotInfo = infoList[3].toDouble();
-            playersList[idInfo]->setRotation(rotInfo);
-            double cannonRotInfo = infoList[4].toDouble();
-            playersList[idInfo]->setCannonRotation(cannonRotInfo);
             ui->logWindow->append("Info received: " + info);
-            qDebug() << "Info from client " + QString::number(i) + ": " + info;
+            QStringList infoList = info.split(" ", QString::SkipEmptyParts);
+            int idInfo;
+            if(infoList[0] == "PlayerKilled:")
+            {
+                idInfo = infoList[1].toInt();
+                playersList[idInfo]->setPos(0,0);
+                playersList[idInfo]->setCannonRotation(0);
+                playersList[idInfo]->setRotation(0);
+            }
+            else
+            {
+                idInfo = infoList[0].toInt();
+                double xInfo = infoList[1].toDouble();
+                double yInfo = infoList[2].toDouble();
+                playersList[idInfo]->setPos(xInfo, yInfo);
+                double rotInfo = infoList[3].toDouble();
+                playersList[idInfo]->setRotation(rotInfo);
+                double cannonRotInfo = infoList[4].toDouble();
+                playersList[idInfo]->setCannonRotation(cannonRotInfo);
+            }
             for(int j = 0; j < clients.size(); ++j)
             {
                 if(clients[j]->isWritable())
@@ -114,11 +124,12 @@ void MainWindow::newInfo()
                     QTextStream out(clients[j]);
                     for(int k = 0; k < playersList.size(); ++k)
                     {
+                        if(idInfo == k) qDebug() << "idInfo = k, xPos: " + QString::number(playersList[k]->getXPos());
                         QString message = QString::number(playersList[k]->id) + " " +
-                                          QString::number(playersList[k]->getXPos()) + " " +
-                                          QString::number(playersList[k]->getYPos()) + " " +
-                                          QString::number(playersList[k]->getRotation()) + " " +
-                                          QString::number(playersList[k]->getCannonRotation());
+                                QString::number(playersList[k]->getXPos()) + " " +
+                                QString::number(playersList[k]->getYPos()) + " " +
+                                QString::number(playersList[k]->getRotation()) + " " +
+                                QString::number(playersList[k]->getCannonRotation());
                         ui->logWindow->append("Message to client " + QString::number(j) + ": " + message);
                         out << message << endl;
                     }
@@ -137,26 +148,18 @@ void MainWindow::clientDisconnect()
             int disconnectedPlayerID = playersList[i]->id;
             playersList.takeAt(i);
             clients.takeAt(i);
-            qDebug() << "Deleted player id: " + QString::number(i);
-            ui->logWindow->append("Disconnecting client: " + QString::number(i));
-            ui->logWindow->append("Client ID: " + QString::number(disconnectedPlayerID));
+            ui->logWindow->append("Disconnecting client " + QString::number(i));
             if(!clients.isEmpty())
             {
-                qDebug() << "Players list not empty";
-                qDebug() << "Clients list size: " + QString::number(clients.size());
                 for(int j = clients.size() - 1; j >= 0; --j)
                 {
-                    qDebug() << "Inside clients dc message loop";
                     if(clients[j]->isWritable())
                     {
                         if(playersList[j]->id > disconnectedPlayerID)
                         {
-                            qDebug() << "OLD ID: " + QString::number(playersList[j]->id);
                             playersList[j]->id = playersList[j]->id - 1;
-                            qDebug() << "NEW ID: " + QString::number(playersList[j]->id);
                         }
                         QTextStream clientOut(clients[j]);
-                        qDebug() << "Sending message about dc client to client: " + QString::number(j);
                         clientOut << "ClientDisconnected: " + QString::number(disconnectedPlayerID) << endl;
                     }
                 }

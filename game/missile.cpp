@@ -69,7 +69,7 @@ bool Missile::canMove(GLfloat top, GLfloat right, GLfloat bottom, GLfloat left)
 
 int Missile::hit(QList<Tank *> *tanksList)
 {
-    GLfloat radius = 1.2;
+    GLfloat radius = 1.3;
     GLfloat missileRadius = 0.2;
     for(int i = 0; i < tanksList->size(); ++i)
     {

@@ -21,7 +21,6 @@ private:
     Ui::MainWindow *ui;
     QList<Tank *> playersList;
 
-
     QTcpServer *server;
     QNetworkSession *networkSession;
     QList<QTcpSocket *> clients;

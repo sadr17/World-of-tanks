@@ -114,9 +114,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
                                                        ui->widget->playerList[playerID]->getYPos(),
                                                        ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation()));
             ui->widget->playerList[playerID]->takeAmmo(1);
-            moved = false;
             return;
         }
+        else
+            return;
     }
     moved = true;
 }
@@ -202,7 +203,8 @@ void MainWindow::onTimer()
         int tankHit = ui->widget->missileList[i]->hit(&ui->widget->playerList);
         if(tankHit >= 0)
         {
-            ui->widget->playerList[tankHit]->setPos(0, 0);
+            QTextStream out(socket);
+            out << "PlayerKilled: " + QString::number(tankHit) << endl;
             delete ui->widget->missileList.takeAt(i);
             continue;
         }
