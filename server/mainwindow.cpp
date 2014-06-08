@@ -50,12 +50,6 @@ void MainWindow::onTimer()
             if(missileList[i]->canMove(20, 20, -20, -20))
             {
                 missileList[i]->move();
-                QString message = "Missile: " + QString::number(i) + " " + getMissileInfo(i);
-                for(int j = 0 ; j < clients.size(); ++j)
-                {
-                    QTextStream out(clients[j]);
-                    out << message << endl;
-                }
             }
             else
             {
@@ -149,14 +143,7 @@ void MainWindow::newInfo()
             ui->logWindow->append("Info received: " + info);
             QStringList infoList = info.split(" ", QString::SkipEmptyParts);
             int idInfo;
-            if(infoList[0] == "PlayerKilled:")
-            {
-                idInfo = infoList[1].toInt();
-                playersList[idInfo]->setPos(0,0);
-                playersList[idInfo]->setCannonRotation(0);
-                playersList[idInfo]->setRotation(0);
-            }
-            else if(infoList[0] == "NewMissile:")
+            if(infoList[0] == "NewMissile:")
             {
                 int tankID = infoList[1].toInt();
                 double missileXPos = infoList[2].toDouble();
@@ -217,7 +204,8 @@ QString MainWindow::getPlayerInfo(int id)
 QString MainWindow::getMissileInfo(int id)
 {
     return QString::number(missileList[id]->getXPos()) + " " +
-           QString::number(missileList[id]->getYPos());
+           QString::number(missileList[id]->getYPos()) + " " +
+           QString::number(missileList[id]->getDirection());
 }
 
 void MainWindow::clientDisconnect()

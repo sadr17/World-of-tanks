@@ -38,7 +38,6 @@ void Display::paintGL()
     {
         missileList[i]->print();
     }
-
 }
 
 Display::~Display()

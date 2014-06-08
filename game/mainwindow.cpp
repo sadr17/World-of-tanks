@@ -65,16 +65,9 @@ void MainWindow::infoReceived()
         {
             GLfloat xPosInfo = (GLfloat)info[1].toDouble();
             GLfloat yPosInfo = (GLfloat)info[2].toDouble();
-            ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo));
+            GLfloat angleInfo = (GLfloat)info[3].toDouble();
+            ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo,angleInfo));
             break;
-        }
-        else if(info[0] == "Missile:")
-        {
-            int idInfo = info[1].toInt();
-            GLfloat xPosInfo = (GLfloat)info[2].toDouble();
-            GLfloat yPosInfo = (GLfloat)info[3].toDouble();
-            ui->widget->missileList[idInfo]->setXPos(xPosInfo);
-            ui->widget->missileList[idInfo]->setYPos(yPosInfo);
         }
         else if(info[0] == "DeleteMissile:")
         {
@@ -222,6 +215,14 @@ void MainWindow::onTimer()
     {
         movePlayer();
         moved = false;
+        ui->widget->updateGL();
+    }
+    if(!ui->widget->missileList.isEmpty())
+    {
+        for(int i = ui->widget->missileList.size()-1; i >= 0; --i)
+        {
+            ui->widget->missileList[i]->move();
+        }
         ui->widget->updateGL();
     }
 }
