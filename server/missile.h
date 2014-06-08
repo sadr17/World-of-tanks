@@ -11,6 +11,9 @@ public:
     Missile(int id, double x = 0, double y = 0, double direction = 0);
     void setXPos(double value);
     void setYPos(double value);
+    double getXPos();
+    double getYPos();
+    double getDirection();
     int tankID;
     void move();
     int hit(QList<Tank*> *tanksList);

@@ -20,12 +20,15 @@ public:
     GLfloat getXPos();
     GLfloat getYPos();
     bool hasAmmo();
+    bool canShoot();
+    void canShoot(bool value);
     void takeAmmo(int value);
     bool canMove(GLfloat speed,QList<Tank *> *tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
     int id;
 private:
     GLfloat xPos, yPos;
     int ammo;
+    bool ableToShoot;
     GLfloat color[4], cannonColor[4];
     GLfloat rotation, cannonRotation;
 };

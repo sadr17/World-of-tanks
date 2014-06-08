@@ -5,7 +5,7 @@ class Tank
 {
 public:
     Tank();
-    Tank(int i);
+    Tank(int i, double x = 0, double y = 0, double rot = 0);
     void setRotation(double value);
     double getRotation();
     void setPos(double x, double y);

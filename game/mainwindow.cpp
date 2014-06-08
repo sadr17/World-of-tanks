@@ -18,6 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     timer.setInterval(30);
     connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
     timer.start();
+    missileTimer.setSingleShot(true);
+    missileTimer.setInterval(2000);
+    connect(&missileTimer,SIGNAL(timeout()),this,SLOT(onMissileTimer()));
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +60,26 @@ void MainWindow::infoReceived()
             {
                 ui->widget->playerList.append(new Tank(i));
             }
+        }
+        else if(info[0] == "NewMissile:")
+        {
+            GLfloat xPosInfo = (GLfloat)info[1].toDouble();
+            GLfloat yPosInfo = (GLfloat)info[2].toDouble();
+            ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo));
+            break;
+        }
+        else if(info[0] == "Missile:")
+        {
+            int idInfo = info[1].toInt();
+            GLfloat xPosInfo = (GLfloat)info[2].toDouble();
+            GLfloat yPosInfo = (GLfloat)info[3].toDouble();
+            ui->widget->missileList[idInfo]->setXPos(xPosInfo);
+            ui->widget->missileList[idInfo]->setYPos(yPosInfo);
+        }
+        else if(info[0] == "DeleteMissile:")
+        {
+            int idInfo = info[1].toInt();
+            delete ui->widget->missileList.takeAt(idInfo);
         }
         else if(info[0] == "ClientDisconnected:")
         {
@@ -107,17 +130,19 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             keyQ = true;
             break;
         case Qt::Key_Space:
-        if(ui->widget->playerList[playerID]->hasAmmo())
+        if(ui->widget->playerList[playerID]->hasAmmo() && ui->widget->playerList[playerID]->canShoot())
         {
-            ui->widget->missileList.append(new Missile(playerID,
-                                                       ui->widget->playerList[playerID]->getXPos(),
-                                                       ui->widget->playerList[playerID]->getYPos(),
-                                                       ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation()));
+            QTextStream out(socket);
+            QString message = "NewMissile: " + QString::number(playerID) + " " +
+                                               QString::number(ui->widget->playerList[playerID]->getXPos()) + " " +
+                                               QString::number(ui->widget->playerList[playerID]->getYPos()) + " " +
+                                               QString::number(ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation());
+            out << message << endl;
             ui->widget->playerList[playerID]->takeAmmo(1);
-            return;
+            ui->widget->playerList[playerID]->canShoot(false);
+            missileTimer.start();
         }
-        else
-            return;
+        return;
     }
     moved = true;
 }
@@ -197,21 +222,11 @@ void MainWindow::onTimer()
     {
         movePlayer();
         moved = false;
+        ui->widget->updateGL();
     }
-    for(int i = ui->widget->missileList.size() - 1; i >= 0; --i)
-    {
-        int tankHit = ui->widget->missileList[i]->hit(&ui->widget->playerList);
-        if(tankHit >= 0)
-        {
-            QTextStream out(socket);
-            out << "PlayerKilled: " + QString::number(tankHit) << endl;
-            delete ui->widget->missileList.takeAt(i);
-            continue;
-        }
-        if(ui->widget->missileList[i]->canMove(20, 20, -20, -20))
-            ui->widget->missileList[i]->move();
-        else
-            delete ui->widget->missileList.takeAt(i);
-    }
-    ui->widget->updateGL();
+}
+
+void MainWindow::onMissileTimer()
+{
+    ui->widget->playerList[playerID]->canShoot(true);
 }

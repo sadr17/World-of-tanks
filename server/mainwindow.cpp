@@ -9,11 +9,66 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(ui->logWindow);
     openSession();
     connect(server,SIGNAL(newConnection()),this,SLOT(newConnection()));
+    timerInterval = 30;
+    gameTimer.setSingleShot(false);
+    gameTimer.setInterval(timerInterval);
+    connect(&gameTimer,SIGNAL(timeout()),this,SLOT(onTimer()));
+    gameTimer.start();
+    setDefaultPos();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::onTimer()
+{
+    if(!missileList.isEmpty())
+    {
+        for(int i = missileList.size() - 1; i >= 0 ;--i)
+        {
+            int tankHitID = missileList[i]->hit(&playersList);
+            if(tankHitID >= 0)
+            {
+                playersList[tankHitID]->setCannonRotation(0);
+                playersList[tankHitID]->setRotation(0);
+                playersList[tankHitID]->setPos(0, 0);
+                delete missileList.takeAt(i);
+                QString message = getPlayerInfo(tankHitID);
+                QString missileMessage = "DeleteMissile: " + QString::number(i);
+                for(int j = 0; j < clients.size(); ++j)
+                {
+                    QTextStream out(clients[j]);
+                    out << message << endl;
+                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
+                    out << missileMessage << endl;
+                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
+                }
+                continue;
+            }
+            if(missileList[i]->canMove(20, 20, -20, -20))
+            {
+                missileList[i]->move();
+                QString message = "Missile: " + QString::number(i) + " " + getMissileInfo(i);
+                for(int j = 0 ; j < clients.size(); ++j)
+                {
+                    QTextStream out(clients[j]);
+                    out << message << endl;
+                }
+            }
+            else
+            {
+                QString missileMessage = "DeleteMissile: " + QString::number(i);
+                for(int j = 0 ; j < clients.size(); ++j)
+                {
+                    QTextStream out(clients[j]);
+                    out << missileMessage << endl;
+                }
+                delete missileList.takeAt(i);
+            }
+        }
+    }
 }
 
 void MainWindow::openSession()
@@ -50,43 +105,38 @@ void MainWindow::newConnection()
         connect(newSocket,SIGNAL(readyRead()),this,SLOT(newInfo()));
         connect(newSocket,SIGNAL(disconnected()),this,SLOT(clientDisconnect()));
         ui->logWindow->append("Client connected\n");
-
-        QTextStream out(newSocket);
-        out << "PlayersOnline: " + QString::number(playersList.size()) << endl;
-        if(!playersList.isEmpty())
-        {
-
-            int listSize = playersList.size();
-            playersList.append(new Tank(listSize));
-
-            for(int i = 0; i < playersList.size(); ++i)
-            {
-                QString message = QString::number(playersList[i]->id) + " " +
-                                  QString::number(playersList[i]->getXPos()) + " " +
-                                  QString::number(playersList[i]->getYPos()) + " " +
-                                  QString::number(playersList[i]->getRotation()) + " " +
-                                  QString::number(playersList[i]->getCannonRotation());
-                ui->logWindow->append("Message about online players sent to client " + QString::number(listSize) + ": " + message);
-                out << message << endl;
-            }
-
-            for(int i = 0; i < clients.size() - 1; ++i)
-            {
-                QTextStream clientsOut(clients[i]);
-                QString message = "NewPlayer: " +
-                                  QString::number(playersList[listSize]->id) + " " +
-                                  QString::number(playersList[listSize]->getXPos()) + " " +
-                                  QString::number(playersList[listSize]->getYPos()) + " " +
-                                  QString::number(playersList[listSize]->getRotation()) + " " +
-                                  QString::number(playersList[listSize]->getCannonRotation());
-                ui->logWindow->append("Message about new player sent to client " + QString::number(i) + ": " + message);
-                clientsOut << message << endl;
-            }
-        }
-        else
-            playersList.append(new Tank(playersList.size()));
+        onConnectMessage(newSocket);
     }
 }
+
+
+void MainWindow::onConnectMessage(QTcpSocket *_socket)
+{
+    QTextStream out(_socket);
+    out << "PlayersOnline: " + QString::number(playersList.size()) << endl;
+    if(!playersList.isEmpty())
+    {
+        int listSize = playersList.size();
+        playersList.append(new Tank(listSize));
+
+        for(int i = 0; i < playersList.size(); ++i)
+        {
+            QString message = getPlayerInfo(i);
+            out << message << endl;
+        }
+
+        QString message = "NewPlayer: " + getPlayerInfo(listSize);
+
+        for(int i = 0; i < clients.size() - 1; ++i)
+        {
+            QTextStream clientsOut(clients[i]);
+            clientsOut << message << endl;
+        }
+    }
+    else
+        playersList.append(new Tank(playersList.size()));
+}
+
 
 void MainWindow::newInfo()
 {
@@ -106,6 +156,27 @@ void MainWindow::newInfo()
                 playersList[idInfo]->setCannonRotation(0);
                 playersList[idInfo]->setRotation(0);
             }
+            else if(infoList[0] == "NewMissile:")
+            {
+                int tankID = infoList[1].toInt();
+                double missileXPos = infoList[2].toDouble();
+                double missileYPos = infoList[3].toDouble();
+                double missileDirection = infoList[4].toDouble();
+                missileList.append(new Missile(tankID, missileXPos, missileYPos, missileDirection));
+                for(int j = 0; j < clients.size(); ++j)
+                {
+                    if(clients[j]->isWritable())
+                    {
+                        QTextStream out(clients[j]);
+                        for(int k = 0; k < missileList.size(); ++k)
+                        {
+                            QString message = "NewMissile: " + getMissileInfo(k);
+                            ui->logWindow->append("Message to client " + QString::number(j) + ": " + message);
+                            out << message << endl;
+                        }
+                    }
+                }
+            }
             else
             {
                 idInfo = infoList[0].toInt();
@@ -124,12 +195,7 @@ void MainWindow::newInfo()
                     QTextStream out(clients[j]);
                     for(int k = 0; k < playersList.size(); ++k)
                     {
-                        if(idInfo == k) qDebug() << "idInfo = k, xPos: " + QString::number(playersList[k]->getXPos());
-                        QString message = QString::number(playersList[k]->id) + " " +
-                                QString::number(playersList[k]->getXPos()) + " " +
-                                QString::number(playersList[k]->getYPos()) + " " +
-                                QString::number(playersList[k]->getRotation()) + " " +
-                                QString::number(playersList[k]->getCannonRotation());
+                        QString message = getPlayerInfo(k);
                         ui->logWindow->append("Message to client " + QString::number(j) + ": " + message);
                         out << message << endl;
                     }
@@ -139,6 +205,21 @@ void MainWindow::newInfo()
     }
 }
 
+QString MainWindow::getPlayerInfo(int id)
+{
+    return QString::number(playersList[id]->id) + " " +
+           QString::number(playersList[id]->getXPos()) + " " +
+           QString::number(playersList[id]->getYPos()) + " " +
+           QString::number(playersList[id]->getRotation()) + " " +
+           QString::number(playersList[id]->getCannonRotation());
+}
+
+QString MainWindow::getMissileInfo(int id)
+{
+    return QString::number(missileList[id]->getXPos()) + " " +
+           QString::number(missileList[id]->getYPos());
+}
+
 void MainWindow::clientDisconnect()
 {
     for(int i = clients.size() - 1; i >= 0; --i)
@@ -146,8 +227,8 @@ void MainWindow::clientDisconnect()
         if(clients[i]->state() == QAbstractSocket::UnconnectedState)
         {
             int disconnectedPlayerID = playersList[i]->id;
-            playersList.takeAt(i);
-            clients.takeAt(i);
+            delete playersList.takeAt(i);
+            delete clients.takeAt(i);
             ui->logWindow->append("Disconnecting client " + QString::number(i));
             if(!clients.isEmpty())
             {
@@ -167,4 +248,23 @@ void MainWindow::clientDisconnect()
             break;
         }
     }
+}
+
+void MainWindow::setDefaultPos()
+{
+    defaultPosTab[0][0] = -15;
+    defaultPosTab[0][1] = 15;
+    defaultPosTab[0][2] = 140;
+
+    defaultPosTab[1][0] = 15;
+    defaultPosTab[1][1] = 15;
+    defaultPosTab[1][2] = 210;
+
+    defaultPosTab[2][0] = 15;
+    defaultPosTab[2][1] = -15;
+    defaultPosTab[2][2] = 320;
+
+    defaultPosTab[3][0] = -15;
+    defaultPosTab[3][1] = -15;
+    defaultPosTab[3][2] = 50;
 }

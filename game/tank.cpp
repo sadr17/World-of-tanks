@@ -16,10 +16,12 @@ Tank::Tank()
     yPos = 0;
     cannonRotation = 0;
     ammo = 50;
+    ableToShoot = true;
 }
 
 Tank::Tank(int i)
 {
+    ableToShoot = true;
     id = i;
     color[0] = 1;
     color[1] = 0;
@@ -34,6 +36,16 @@ Tank::Tank(int i)
     xPos = 0;
     yPos = 0;
     ammo = 50;
+}
+
+bool Tank::canShoot()
+{
+    return ableToShoot;
+}
+
+void Tank::canShoot(bool value)
+{
+    ableToShoot = value;
 }
 
 void Tank::print()

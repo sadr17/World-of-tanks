@@ -20,7 +20,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-//    bool eventFilter(QObject *object, QEvent *event);
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
 
@@ -30,9 +29,11 @@ private slots:
     void on_actionConnect_triggered();
     void infoReceived();
     void onTimer();
+    void onMissileTimer();
 private:
     Ui::MainWindow *ui;
     QTimer timer;
+    QTimer missileTimer;
     bool moved;
     void movePlayer();
     int playerID;

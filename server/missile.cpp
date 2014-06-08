@@ -25,6 +25,21 @@ void Missile::setYPos(double value)
     yPos = value;
 }
 
+double Missile::getXPos()
+{
+    return xPos;
+}
+
+double Missile::getYPos()
+{
+    return yPos;
+}
+
+double Missile::getDirection()
+{
+    return angle;
+}
+
 void Missile::move()
 {
     xPos += sin(angle*M_PI/180)*speed;
