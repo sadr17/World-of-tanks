@@ -52,12 +52,24 @@
     </property>
     <addaction name="actionConnect"/>
    </widget>
+   <widget class="QMenu" name="menuWyjd">
+    <property name="title">
+     <string>Wyjdź</string>
+    </property>
+    <addaction name="actionWyjd"/>
+   </widget>
    <addaction name="menuPo_czenie"/>
+   <addaction name="menuWyjd"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionConnect">
    <property name="text">
     <string>Połacz</string>
+   </property>
+  </action>
+  <action name="actionWyjd">
+   <property name="text">
+    <string>Wyjdź</string>
    </property>
   </action>
  </widget>

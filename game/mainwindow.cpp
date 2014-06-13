@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->widget->setWindowState(Qt::WindowFullScreen);
     setCentralWidget(ui->widget);
     playerID = 0;
     socket = new QTcpSocket(this);
@@ -14,13 +13,13 @@ MainWindow::MainWindow(QWidget *parent) :
     on_actionConnect_triggered();
     moved = false;
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = false;
+
     timer.setSingleShot(false);
-    timer.setInterval(30);
+    timer.setInterval(10);
     connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
     timer.start();
-    missileTimer.setSingleShot(true);
-    missileTimer.setInterval(2000);
-    connect(&missileTimer,SIGNAL(timeout()),this,SLOT(onMissileTimer()));
+    mt = 0;
+    mtON = false;
 }
 
 MainWindow::~MainWindow()
@@ -56,9 +55,9 @@ void MainWindow::infoReceived()
         else if(info[0] == "PlayersOnline:")
         {
             playerID = info[1].toInt();
-            for(int i = 0; i <= playerID; ++i)
+            for(int j = 0; j <= playerID; ++i)
             {
-                ui->widget->playerList.append(new Tank(i));
+                ui->widget->playerList.append(new Tank(j));
             }
         }
         else if(info[0] == "NewMissile:")
@@ -133,11 +132,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             out << message << endl;
             ui->widget->playerList[playerID]->takeAmmo(1);
             ui->widget->playerList[playerID]->canShoot(false);
-            missileTimer.start();
+            mtON = true;
         }
         return;
     }
     moved = true;
+    QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
@@ -163,13 +163,14 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             keyQ = false;
             break;
     }
+    QMainWindow::keyReleaseEvent(event);
 }
 
 void MainWindow::movePlayer()
 {
     if(keyUp)
     {
-        if(ui->widget->playerList[playerID]->canMove(0.2, &ui->widget->playerList, 20, 20, -20, -20, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(0.3, &ui->widget->playerList, 20, 20, -20, -20, 1.5))
             ui->widget->playerList[playerID]->move(0.3);
     }
     else if(keyDown)
@@ -211,6 +212,17 @@ void MainWindow::on_actionConnect_triggered()
 
 void MainWindow::onTimer()
 {
+    if(mtON)
+    {
+        if(mt >= 2000)
+        {
+            ui->widget->playerList[playerID]->canShoot(true);
+            mtON = false;
+            mt = 0;
+        }
+        else
+            mt += 10;
+    }
     if(moved)
     {
         movePlayer();
@@ -227,7 +239,7 @@ void MainWindow::onTimer()
     }
 }
 
-void MainWindow::onMissileTimer()
+void MainWindow::on_actionWyjd_triggered()
 {
-    ui->widget->playerList[playerID]->canShoot(true);
+    exit(1);
 }

@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QDir>
 #include <QDebug>
+#include <QDesktopWidget>
 
 namespace Ui {
 class MainWindow;
@@ -29,11 +30,13 @@ private slots:
     void on_actionConnect_triggered();
     void infoReceived();
     void onTimer();
-    void onMissileTimer();
+    void on_actionWyjd_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTimer timer;
-    QTimer missileTimer;
+    int mt;
+    bool mtON;
     bool moved;
     void movePlayer();
     int playerID;
