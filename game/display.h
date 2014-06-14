@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <QGLWidget>
+#include <QDebug>
 #include "tank.h"
 #include "missile.h"
 
@@ -13,10 +14,15 @@ public:
     QList<Tank *> playerList;
     QList<Missile *> missileList;
     ~Display();
+    GLint mapWidth;
+    GLint mapHeight;
+    QString ammoHud;
+
 private:
     void paintGL();
     void initializeGL();
     void resizeGL(int w, int h);
+    void drawHudBar();
     GLfloat bColor[4];
 signals:
 

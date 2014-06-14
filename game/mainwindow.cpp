@@ -6,16 +6,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QSizePolicy qsp(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    qsp.setHeightForWidth(true);
+    this->setSizePolicy(qsp);
     setCentralWidget(ui->widget);
+    this->setFixedSize(1280,800);
+
     playerID = 0;
     socket = new QTcpSocket(this);
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
-    on_actionConnect_triggered();
+    connectBox();
+
     moved = false;
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = false;
 
+    timerInterval = 15;
+
     timer.setSingleShot(false);
-    timer.setInterval(10);
+    timer.setInterval(timerInterval);
     connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
     timer.start();
     mt = 0;
@@ -55,7 +63,7 @@ void MainWindow::infoReceived()
         else if(info[0] == "PlayersOnline:")
         {
             playerID = info[1].toInt();
-            for(int j = 0; j <= playerID; ++i)
+            for(int j = 0; j <= playerID; ++j)
             {
                 ui->widget->playerList.append(new Tank(j));
             }
@@ -87,6 +95,7 @@ void MainWindow::infoReceived()
         else
         {
             int idInfo = info[0].toInt();
+            if(idInfo == playerID) return;
             GLfloat xPosInfo = (GLfloat)info[1].toDouble();
             GLfloat yPosInfo = (GLfloat)info[2].toDouble();
             GLfloat rotInfo = (GLfloat)info[3].toDouble();
@@ -122,19 +131,20 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             keyQ = true;
             break;
         case Qt::Key_Space:
-        if(ui->widget->playerList[playerID]->hasAmmo() && ui->widget->playerList[playerID]->canShoot())
-        {
-            QTextStream out(socket);
-            QString message = "NewMissile: " + QString::number(playerID) + " " +
-                                               QString::number(ui->widget->playerList[playerID]->getXPos()) + " " +
-                                               QString::number(ui->widget->playerList[playerID]->getYPos()) + " " +
-                                               QString::number(ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation());
-            out << message << endl;
-            ui->widget->playerList[playerID]->takeAmmo(1);
-            ui->widget->playerList[playerID]->canShoot(false);
-            mtON = true;
-        }
-        return;
+            if(ui->widget->playerList[playerID]->hasAmmo() && ui->widget->playerList[playerID]->canShoot())
+            {
+                QTextStream out(socket);
+                QString message = "NewMissile: " + QString::number(playerID) + " " +
+                                                   QString::number(ui->widget->playerList[playerID]->getXPos()) + " " +
+                                                   QString::number(ui->widget->playerList[playerID]->getYPos()) + " " +
+                                                   QString::number(ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation());
+                out << message << endl;
+                ui->widget->playerList[playerID]->takeAmmo(1);
+                ui->widget->ammoHud = ui->widget->playerList[playerID]->ammoText();
+                ui->widget->playerList[playerID]->canShoot(false);
+                mtON = true;
+            }
+            return;
     }
     moved = true;
     QMainWindow::keyPressEvent(event);
@@ -170,13 +180,17 @@ void MainWindow::movePlayer()
 {
     if(keyUp)
     {
-        if(ui->widget->playerList[playerID]->canMove(0.3, &ui->widget->playerList, 20, 20, -20, -20, 1.5))
-            ui->widget->playerList[playerID]->move(0.3);
+        GLint mapWidth = (ui->widget->mapWidth)/2;
+        GLint mapHeight = (ui->widget->mapHeight)/2;
+        if(ui->widget->playerList[playerID]->canMove(0.18, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+            ui->widget->playerList[playerID]->move(0.18);
     }
     else if(keyDown)
     {
-        if(ui->widget->playerList[playerID]->canMove(-0.1, &ui->widget->playerList, 20, 20, -20, -20, 1.5))
-            ui->widget->playerList[playerID]->move(-0.2);
+        GLint mapWidth = (ui->widget->mapWidth)/2;
+        GLint mapHeight = (ui->widget->mapHeight)/2;
+        if(ui->widget->playerList[playerID]->canMove(-0.1, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+            ui->widget->playerList[playerID]->move(-0.1);
     }
     if(keyLeft)
         ui->widget->playerList[playerID]->rotate(-5);
@@ -195,7 +209,7 @@ void MainWindow::movePlayer()
            + " " + QString::number(ui->widget->playerList[playerID]->getCannonRotation()) << endl;
 }
 
-void MainWindow::on_actionConnect_triggered()
+void MainWindow::connectBox()
 {
     bool ok;
     QString connectionData = QInputDialog::getText(this, tr("Podaj adres serwera"), tr("Podaj adres IP oraz port:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
@@ -203,6 +217,7 @@ void MainWindow::on_actionConnect_triggered()
     {
         QStringList data = connectionData.split(":", QString::SkipEmptyParts);
         socket->connectToHost(data[0], data[1].toInt());
+
     }
     else
     {
@@ -212,6 +227,7 @@ void MainWindow::on_actionConnect_triggered()
 
 void MainWindow::onTimer()
 {
+    // Shoot timer
     if(mtON)
     {
         if(mt >= 2000)
@@ -221,14 +237,18 @@ void MainWindow::onTimer()
             mt = 0;
         }
         else
-            mt += 10;
+            mt += timerInterval;
     }
+
+    // Movement
     if(moved)
     {
         movePlayer();
         moved = false;
         ui->widget->updateGL();
     }
+
+    // Missiles
     if(!ui->widget->missileList.isEmpty())
     {
         for(int i = ui->widget->missileList.size()-1; i >= 0; --i)
@@ -237,9 +257,4 @@ void MainWindow::onTimer()
         }
         ui->widget->updateGL();
     }
-}
-
-void MainWindow::on_actionWyjd_triggered()
-{
-    exit(1);
 }

@@ -7,15 +7,21 @@ Display::Display(QWidget *parent) :
     bColor[1] = 0.7;
     bColor[2] = 0.7;
     bColor[3] = 1;
+
+    mapWidth = 64;
+    mapHeight = 36;
+
+    ammoHud = "50";
 }
 
 void Display::resizeGL(int w, int h)
 {
-    int s = qMin(w, h);
-    glViewport((w-s)/2,(h-s)/2,s,s);
+//    int s = qMin(w, h);
+//    glViewport((w-s)/2,(h-s)/2,s,s);
+    glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-20,20,-20,20,4,15);
+    glOrtho(-(mapWidth/2),mapWidth/2,-(mapHeight/2),mapHeight/2,4,15);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -38,6 +44,22 @@ void Display::paintGL()
     {
         missileList[i]->print();
     }
+    drawHudBar();
+}
+
+void Display::drawHudBar()
+{
+    glPushMatrix();
+        qglColor(Qt::white);
+        renderText(-31, -17.7, 0, ammoHud + "/50", QFont("Arial", 12, QFont::Normal, false));
+        glBegin(GL_POLYGON);
+        glColor3d(0.3,0.3,0.3);
+        glVertex2d(-32.0,-16.8);
+        glVertex2d(32.0,-16.8);
+        glVertex2d(32.0,-18.0);
+        glVertex2d(-32.0,-18.0);
+        glEnd();
+    glPopMatrix();
 }
 
 Display::~Display()

@@ -9,6 +9,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QSizePolicy>
 
 namespace Ui {
 class MainWindow;
@@ -23,23 +24,24 @@ public:
     ~MainWindow();
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
+    virtual int heightForWidth(int w) const {return w * 9/16;};
 
 signals:
 
 private slots:
-    void on_actionConnect_triggered();
     void infoReceived();
     void onTimer();
-    void on_actionWyjd_triggered();
 
 private:
     Ui::MainWindow *ui;
     QTimer timer;
+    void connectBox();
     int mt;
     bool mtON;
     bool moved;
     void movePlayer();
     int playerID;
+    int timerInterval;
     QTcpSocket *socket;
     bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE;
 };

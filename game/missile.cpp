@@ -55,10 +55,10 @@ void Missile::print()
         glTranslatef(xPos, yPos, 0);
         glBegin(GL_POLYGON);
         glColor4fv(color);
-        glVertex2f(-0.15,0.15);
-        glVertex2f(0.15,0.15);
-        glVertex2f(0.15,-0.15);
-        glVertex2f(-0.15,-0.15);
+        glVertex2f(-0.09,0.09);
+        glVertex2f(0.09,0.09);
+        glVertex2f(0.09,-0.09);
+        glVertex2f(-0.09,-0.09);
         glEnd();
     glPopMatrix();
 }

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl network
+QT       += core gui network opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,9 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    display.cpp \
-    tank.cpp \
-    missile.cpp
+        display.cpp \
+        tank.cpp \
+        missile.cpp
 
 HEADERS  += mainwindow.h \
     display.h \

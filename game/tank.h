@@ -20,6 +20,7 @@ public:
     GLfloat getXPos();
     GLfloat getYPos();
     bool hasAmmo();
+    QString ammoText();
     bool canShoot();
     void canShoot(bool value);
     void takeAmmo(int value);

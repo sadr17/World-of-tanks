@@ -37,41 +37,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>739</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuPo_czenie">
-    <property name="title">
-     <string>Połączenie</string>
-    </property>
-    <addaction name="actionConnect"/>
-   </widget>
-   <widget class="QMenu" name="menuWyjd">
-    <property name="title">
-     <string>Wyjdź</string>
-    </property>
-    <addaction name="actionWyjd"/>
-   </widget>
-   <addaction name="menuPo_czenie"/>
-   <addaction name="menuWyjd"/>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionConnect">
-   <property name="text">
-    <string>Połacz</string>
-   </property>
-  </action>
-  <action name="actionWyjd">
-   <property name="text">
-    <string>Wyjdź</string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

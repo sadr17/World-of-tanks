@@ -57,29 +57,29 @@ void Tank::print()
                 glRotatef(-cannonRotation,0,0,1);
                 glBegin(GL_POLYGON);
                 glColor4fv(cannonColor);
-                glVertex2d(-0.6,0.6);
-                glVertex2d(0.6,0.6);
-                glVertex2d(0.6,-0.6);
-                glVertex2d(-0.6,-0.6);
+                glVertex2d(-0.36,0.36);
+                glVertex2d(0.36,0.36);
+                glVertex2d(0.36,-0.36);
+                glVertex2d(-0.36,-0.36);
                 glEnd();
                 glBegin(GL_POLYGON);
                 glColor4fv(cannonColor);
-                glVertex2d(-0.2, 0);
-                glVertex2d(-0.2, 2.0);
-                glVertex2d(0.2,2.0);
-                glVertex2d(0.2,0);
+                glVertex2d(-0.12, 0);
+                glVertex2d(-0.12, 1.2);
+                glVertex2d(0.12,1.2);
+                glVertex2d(0.12,0);
                 glEnd();
             glPopMatrix();
             glPushMatrix();
                 glBegin(GL_POLYGON);
                 glColor4fv(color);
-                glVertex2d(-1,1);
-                glVertex2d(0,1.5);
-                glVertex2d(1,1);
-                glVertex2d(1,-1);
-                glVertex2d(0.8,-1.2);
-                glVertex2d(-0.8,-1.2);
-                glVertex2d(-1,-1);
+                glVertex2d(-0.6,0.6);
+                glVertex2d(0,0.9);
+                glVertex2d(0.6,0.6);
+                glVertex2d(0.6,-0.6);
+                glVertex2d(0.48,-0.72);
+                glVertex2d(-0.48,-0.72);
+                glVertex2d(-0.6,-0.6);
                 glEnd();
             glPopMatrix();
         glPopMatrix();
@@ -167,4 +167,9 @@ bool Tank::hasAmmo()
 void Tank::takeAmmo(int value)
 {
     ammo -= value;
+}
+
+QString Tank::ammoText()
+{
+    return QString::number(ammo);
 }

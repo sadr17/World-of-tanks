@@ -7,13 +7,16 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setCentralWidget(ui->logWindow);
+    // Connection
     openSession();
     connect(server,SIGNAL(newConnection()),this,SLOT(newConnection()));
-    timerInterval = 30;
+    // Game timer
+    timerInterval = 17;
     gameTimer.setSingleShot(false);
     gameTimer.setInterval(timerInterval);
     connect(&gameTimer,SIGNAL(timeout()),this,SLOT(onTimer()));
     gameTimer.start();
+    // Default position tab
     setDefaultPos();
 }
 
@@ -47,7 +50,7 @@ void MainWindow::onTimer()
                 }
                 continue;
             }
-            if(missileList[i]->canMove(20, 20, -20, -20))
+            if(missileList[i]->canMove(18, 32, -16.8, -32))
             {
                 missileList[i]->move();
             }
@@ -140,7 +143,6 @@ void MainWindow::newInfo()
         {
             QTextStream in(clients[i]);
             QString info = in.readLine();
-            ui->logWindow->append("Info received: " + info);
             QStringList infoList = info.split(" ", QString::SkipEmptyParts);
             int idInfo;
             if(infoList[0] == "NewMissile:")
@@ -158,7 +160,6 @@ void MainWindow::newInfo()
                         for(int k = 0; k < missileList.size(); ++k)
                         {
                             QString message = "NewMissile: " + getMissileInfo(k);
-                            ui->logWindow->append("Message to client " + QString::number(j) + ": " + message);
                             out << message << endl;
                         }
                     }
@@ -183,7 +184,6 @@ void MainWindow::newInfo()
                     for(int k = 0; k < playersList.size(); ++k)
                     {
                         QString message = getPlayerInfo(k);
-                        ui->logWindow->append("Message to client " + QString::number(j) + ": " + message);
                         out << message << endl;
                     }
                 }
@@ -240,9 +240,9 @@ void MainWindow::clientDisconnect()
 
 void MainWindow::setDefaultPos()
 {
-    defaultPosTab[0][0] = -15;
-    defaultPosTab[0][1] = 15;
-    defaultPosTab[0][2] = 140;
+    defaultPosTab[0][0] = -15; // xPos
+    defaultPosTab[0][1] = 15; // yPos
+    defaultPosTab[0][2] = 140; // rot
 
     defaultPosTab[1][0] = 15;
     defaultPosTab[1][1] = 15;
