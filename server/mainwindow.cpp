@@ -38,7 +38,7 @@ void MainWindow::onTimer()
                 playersList[tankHitID]->setRotation(0);
                 playersList[tankHitID]->setPos(0, 0);
                 delete missileList.takeAt(i);
-                QString message = getPlayerInfo(tankHitID);
+                QString message = "PlayerKilled: " + getPlayerInfo(tankHitID);
                 QString missileMessage = "DeleteMissile: " + QString::number(i);
                 for(int j = 0; j < clients.size(); ++j)
                 {
@@ -46,7 +46,7 @@ void MainWindow::onTimer()
                     out << message << endl;
                     ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
                     out << missileMessage << endl;
-                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
+                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + missileMessage);
                 }
                 continue;
             }
@@ -101,7 +101,7 @@ void MainWindow::newConnection()
         clients.push_back(newSocket);
         connect(newSocket,SIGNAL(readyRead()),this,SLOT(newInfo()));
         connect(newSocket,SIGNAL(disconnected()),this,SLOT(clientDisconnect()));
-        ui->logWindow->append("Client connected\n");
+        ui->logWindow->append("Client connected");
         onConnectMessage(newSocket);
     }
 }
@@ -111,6 +111,7 @@ void MainWindow::onConnectMessage(QTcpSocket *_socket)
 {
     QTextStream out(_socket);
     out << "PlayersOnline: " + QString::number(playersList.size()) << endl;
+    qDebug() << "PlayersOnline: " + QString::number(playersList.size());
     if(!playersList.isEmpty())
     {
         int listSize = playersList.size();
@@ -143,10 +144,12 @@ void MainWindow::newInfo()
         {
             QTextStream in(clients[i]);
             QString info = in.readLine();
+            qDebug() << "Otrzymalem info: " + info;
             QStringList infoList = info.split(" ", QString::SkipEmptyParts);
             int idInfo;
             if(infoList[0] == "NewMissile:")
             {
+                ui->logWindow->append("New Missile");
                 int tankID = infoList[1].toInt();
                 double missileXPos = infoList[2].toDouble();
                 double missileYPos = infoList[3].toDouble();
@@ -183,8 +186,10 @@ void MainWindow::newInfo()
                     QTextStream out(clients[j]);
                     for(int k = 0; k < playersList.size(); ++k)
                     {
+                        if(k == j) continue;
                         QString message = getPlayerInfo(k);
                         out << message << endl;
+                        qDebug() << "Wiadomosc do gracza [" + QString::number(j) + "]: " + message;
                     }
                 }
             }

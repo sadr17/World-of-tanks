@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(socket,SIGNAL(readyRead()),this,SLOT(infoReceived()));
     connectBox();
 
-    moved = false;
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = false;
 
     timerInterval = 15;
@@ -40,72 +39,76 @@ MainWindow::~MainWindow()
 void MainWindow::infoReceived()
 {
     QTextStream in(socket);
-    int listSize = ui->widget->playerList.size();
-    if(ui->widget->playerList.isEmpty()) listSize = 1;
-    for(int i = 0; i < listSize; ++i)
+    QString message = in.readLine();
+    qDebug() << "Dostalem wiadomosc: " + message;
+    if(message.isEmpty()) return;
+    QStringList info = message.split(" ", QString::SkipEmptyParts);
+    if(info[0] == "NewPlayer:")
     {
-        QString message = in.readLine();
-        if(message.isEmpty()) break;
-        QStringList info = message.split(" ", QString::SkipEmptyParts);
-        if(info[0] == "NewPlayer:")
+        int idInfo = info[1].toInt();
+        ui->widget->playerList.append(new Tank(idInfo));
+        GLfloat xPosInfo = (GLfloat)info[2].toDouble();
+        GLfloat yPosInfo = (GLfloat)info[3].toDouble();
+        GLfloat rotInfo = (GLfloat)info[4].toDouble();
+        GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
+        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
+        ui->widget->playerList[idInfo]->setRotation(rotInfo);
+        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+    }
+    else if(info[0] == "PlayersOnline:")
+    {
+        playerID = info[1].toInt();
+        for(int i = 0; i <= playerID; ++i)
         {
-            int idInfo = info[1].toInt();
-            ui->widget->playerList.append(new Tank(idInfo));
-            GLfloat xPosInfo = (GLfloat)info[2].toDouble();
-            GLfloat yPosInfo = (GLfloat)info[3].toDouble();
-            GLfloat rotInfo = (GLfloat)info[4].toDouble();
-            GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
-            ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
-            ui->widget->playerList[idInfo]->setRotation(rotInfo);
-            ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
-            break;
-        }
-        else if(info[0] == "PlayersOnline:")
-        {
-            playerID = info[1].toInt();
-            for(int j = 0; j <= playerID; ++j)
-            {
-                ui->widget->playerList.append(new Tank(j));
-            }
-        }
-        else if(info[0] == "NewMissile:")
-        {
-            GLfloat xPosInfo = (GLfloat)info[1].toDouble();
-            GLfloat yPosInfo = (GLfloat)info[2].toDouble();
-            GLfloat angleInfo = (GLfloat)info[3].toDouble();
-            ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo,angleInfo));
-            break;
-        }
-        else if(info[0] == "DeleteMissile:")
-        {
-            int idInfo = info[1].toInt();
-            delete ui->widget->missileList.takeAt(idInfo);
-        }
-        else if(info[0] == "ClientDisconnected:")
-        {
-            int idInfo = info[1].toInt();
-            delete ui->widget->playerList.takeAt(idInfo);
-            if(playerID > idInfo)
-            {
-                playerID--;
-                ui->widget->playerList[playerID]->id--;
-            }
-            break;
-        }
-        else
-        {
-            int idInfo = info[0].toInt();
-            if(idInfo == playerID) return;
-            GLfloat xPosInfo = (GLfloat)info[1].toDouble();
-            GLfloat yPosInfo = (GLfloat)info[2].toDouble();
-            GLfloat rotInfo = (GLfloat)info[3].toDouble();
-            GLfloat cannonRotInfo = (GLfloat)info[4].toDouble();
-            ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
-            ui->widget->playerList[idInfo]->setRotation(rotInfo);
-            ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+            ui->widget->playerList.append(new Tank(i));
         }
     }
-    ui->widget->updateGL();
+    else if(info[0] == "NewMissile:")
+    {
+        GLfloat xPosInfo = (GLfloat)info[1].toDouble();
+        GLfloat yPosInfo = (GLfloat)info[2].toDouble();
+        GLfloat angleInfo = (GLfloat)info[3].toDouble();
+        ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo,angleInfo));
+        qDebug() << "Stworzylem nowy pocisk";
+    }
+    else if(info[0] == "DeleteMissile:")
+    {
+        int idInfo = info[1].toInt();
+        delete ui->widget->missileList.takeAt(idInfo);
+    }
+    else if(info[0] == "ClientDisconnected:")
+    {
+        int idInfo = info[1].toInt();
+        delete ui->widget->playerList.takeAt(idInfo);
+        if(playerID > idInfo)
+        {
+            playerID--;
+            ui->widget->playerList[playerID]->id--;
+        }
+    }
+    else if(info[0] == "PlayerKilled:")
+    {
+        int idInfo = info[1].toInt();
+        GLfloat xPosInfo = (GLfloat)info[2].toDouble();
+        GLfloat yPosInfo = (GLfloat)info[3].toDouble();
+        GLfloat rotInfo = (GLfloat)info[4].toDouble();
+        GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
+        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
+        ui->widget->playerList[idInfo]->setRotation(rotInfo);
+        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+    }
+    else
+    {
+        int idInfo = info[0].toInt();
+        qDebug() << "Przesuwam gracza nr: " + info[0];
+        GLfloat xPosInfo = (GLfloat)info[1].toDouble();
+        GLfloat yPosInfo = (GLfloat)info[2].toDouble();
+        GLfloat rotInfo = (GLfloat)info[3].toDouble();
+        GLfloat cannonRotInfo = (GLfloat)info[4].toDouble();
+        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
+        ui->widget->playerList[idInfo]->setRotation(rotInfo);
+        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+    }
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -141,12 +144,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
                 out << message << endl;
                 ui->widget->playerList[playerID]->takeAmmo(1);
                 ui->widget->ammoHud = ui->widget->playerList[playerID]->ammoText();
+                ui->widget->ammoProgress = 0;
                 ui->widget->playerList[playerID]->canShoot(false);
                 mtON = true;
             }
-            return;
+            break;
     }
-    moved = true;
     QMainWindow::keyPressEvent(event);
 }
 
@@ -178,12 +181,14 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::movePlayer()
 {
+    bool moving = false;
     if(keyUp)
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
         if(ui->widget->playerList[playerID]->canMove(0.18, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(0.18);
+        moving = true;
     }
     else if(keyDown)
     {
@@ -191,22 +196,39 @@ void MainWindow::movePlayer()
         GLint mapHeight = (ui->widget->mapHeight)/2;
         if(ui->widget->playerList[playerID]->canMove(-0.1, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(-0.1);
+        moving = true;
     }
     if(keyLeft)
+    {
         ui->widget->playerList[playerID]->rotate(-5);
+        moving = true;
+    }
     else if(keyRight)
+    {
         ui->widget->playerList[playerID]->rotate(5);
+        moving = true;
+    }
     if(keyE)
-        ui->widget->playerList[playerID]->rotateCannon(-3);
-    else if(keyQ)
+    {
         ui->widget->playerList[playerID]->rotateCannon(3);
+        moving = true;
+    }
+    else if(keyQ)
+    {
+        ui->widget->playerList[playerID]->rotateCannon(-3);
+        moving = true;
+    }
+
+    if(!moving) return;
 
     QTextStream out(socket);
-    out << QString::number(ui->widget->playerList[playerID]->id)
-           + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
-           + " " + QString::number(ui->widget->playerList[playerID]->getRotation())
-           + " " + QString::number(ui->widget->playerList[playerID]->getCannonRotation()) << endl;
+    QString message = QString::number(ui->widget->playerList[playerID]->id)
+            + " " + QString::number(ui->widget->playerList[playerID]->getXPos())
+            + " " + QString::number(ui->widget->playerList[playerID]->getYPos())
+            + " " + QString::number(ui->widget->playerList[playerID]->getRotation())
+            + " " + QString::number(ui->widget->playerList[playerID]->getCannonRotation());
+    out << message << endl;
+    qDebug() << "Wysylam wiadomosc: " + message;
 }
 
 void MainWindow::connectBox()
@@ -227,7 +249,6 @@ void MainWindow::connectBox()
 
 void MainWindow::onTimer()
 {
-    // Shoot timer
     if(mtON)
     {
         if(mt >= 2000)
@@ -235,26 +256,23 @@ void MainWindow::onTimer()
             ui->widget->playerList[playerID]->canShoot(true);
             mtON = false;
             mt = 0;
+            ui->widget->ammoProgress = 1.0;
         }
         else
+        {
             mt += timerInterval;
+            ui->widget->ammoProgress += ((GLfloat)timerInterval)/1000/2;
+        }
     }
 
-    // Movement
-    if(moved)
-    {
-        movePlayer();
-        moved = false;
-        ui->widget->updateGL();
-    }
-
-    // Missiles
     if(!ui->widget->missileList.isEmpty())
     {
         for(int i = ui->widget->missileList.size()-1; i >= 0; --i)
         {
             ui->widget->missileList[i]->move();
+            qDebug() << "Przesuwam pocisk " + QString::number(i);
         }
-        ui->widget->updateGL();
     }
+    movePlayer();
+    ui->widget->updateGL();
 }

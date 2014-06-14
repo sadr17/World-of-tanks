@@ -25,3 +25,9 @@
 # Tablica wynikow
 
 # Plansza 
+
+
+### PROBLEMY ###
+
+Nie rysuje sie pocisk (Przesuwanie w timerze klienta -> OK; Przesuwanie na serwerze -> OK, Wchodzi do petli rysowania w Display -> OK)
+ + czasem sie nie usuwa.

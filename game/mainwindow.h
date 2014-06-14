@@ -38,7 +38,6 @@ private:
     void connectBox();
     int mt;
     bool mtON;
-    bool moved;
     void movePlayer();
     int playerID;
     int timerInterval;

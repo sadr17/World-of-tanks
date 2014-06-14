@@ -17,7 +17,7 @@ public:
     GLint mapWidth;
     GLint mapHeight;
     QString ammoHud;
-
+    GLdouble ammoProgress;
 private:
     void paintGL();
     void initializeGL();
