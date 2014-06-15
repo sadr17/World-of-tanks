@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "tank.h"
 #include "missile.h"
+#include "score.h"
 
 namespace Ui {
 class MainWindow;
@@ -23,8 +24,10 @@ private:
     Ui::MainWindow *ui;
     QList<Tank *> playersList;
     QList<Missile *> missileList;
+    QList<Score *> scoreboard;
     double defaultPosTab[4][3];
     void setDefaultPos();
+    void updateGame(QString &data);
 
     QTcpServer *server;
     QNetworkSession *networkSession;

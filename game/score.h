@@ -8,11 +8,12 @@ public:
     Score(int i);
     void addKill();
     void addDeath();
-    void setID(int i);
+    void setDeaths(int value);
+    void setKills(int value);
+    int tankID;
 private:
     int kills;
     int deaths;
-    int tankID;
 };
 
 #endif // SCORE_H

@@ -13,13 +13,12 @@ Display::Display(QWidget *parent) :
 
     ammoHud = "50";
     ammoProgress = 1.0;
+    drawScore = false;
 }
 
 void Display::resizeGL(int w, int h)
 {
-//    int s = qMin(w, h);
-//    glViewport((w-s)/2,(h-s)/2,s,s);
-    glViewport(0,0,w,h);
+    glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-(mapWidth/2),mapWidth/2,-(mapHeight/2),mapHeight/2,4,15);
@@ -46,33 +45,51 @@ void Display::paintGL()
     for(int i = missileList.size() - 1; i >= 0; --i)
     {
         missileList[i]->print();
-        qDebug() << "Leci pocisk " + QString::number(i);
     }
     drawHudBar();
+    if (drawScore) drawScoreboard();
 }
 
 void Display::drawHudBar()
 {
-    // Ammo status
-    qglColor(Qt::white);
-    renderText(-31, -17.7, -4, ammoHud + "/50", QFont("Arial", 12, QFont::Normal, false));
-    // Ammo bar
-    GLdouble progress = 18 * ammoProgress;
-    glBegin(GL_POLYGON);
-    glColor3d(1.0 - ammoProgress, 0 + ammoProgress, 0);
-    glVertex2d(-28, -17.8);
-    glVertex2d(-28, -17.0);
-    glVertex2d(-28 + progress, -17.0);
-    glVertex2d(-28 + progress, -17.8);
-    glEnd();
-    // Background
-    glBegin(GL_POLYGON);
-    glColor4d(0.3,0.3,0.3,1.0);
-    glVertex2d(-32.0,-16.8);
-    glVertex2d(32.0,-16.8);
-    glVertex2d(32.0,-18.0);
-    glVertex2d(-32.0,-18.0);
-    glEnd();
+    glPushMatrix();
+        // Ammo status
+        qglColor(Qt::white);
+        renderText(-31, -17.7, -4, ammoHud + "/50", QFont("Arial", 12, QFont::Normal, false));
+        // Ammo bar
+        GLdouble progress = 18 * ammoProgress;
+        glBegin(GL_POLYGON);
+        glColor3d(1.0 - ammoProgress, 0 + ammoProgress, 0);
+        glVertex2d(-28, -17.8);
+        glVertex2d(-28, -17.0);
+        glVertex2d(-28 + progress, -17.0);
+        glVertex2d(-28 + progress, -17.8);
+        glEnd();
+        // Background
+        glBegin(GL_POLYGON);
+        glColor4d(0.3,0.3,0.3,1.0);
+        glVertex2d(-32.0,-16.8);
+        glVertex2d(32.0,-16.8);
+        glVertex2d(32.0,-18.0);
+        glVertex2d(-32.0,-18.0);
+        glEnd();
+    glPopMatrix();
+}
+
+void Display::drawScoreboard()
+{
+    glPushMatrix();
+        qglColor(Qt::white);
+        renderText(-29, 11.0, -8, "Tablica wyników", QFont("Arial", 12, QFont::Normal, false));
+        glTranslated(0.0, 0.0, 2.0);
+        glBegin(GL_POLYGON);
+        glColor4f(0, 0, 0, 0.8);
+        glVertex2d(-32.0, 12.0);
+        glVertex2d(-20.0, 12.0);
+        glVertex2d(-20.0, -12.0);
+        glVertex2d(-32.0, -12.0);
+        glEnd();
+    glPopMatrix();
 }
 
 Display::~Display()

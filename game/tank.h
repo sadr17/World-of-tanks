@@ -8,6 +8,7 @@ class Tank
 public:
     Tank();
     Tank(int i);
+    Tank(int i, GLfloat x, GLfloat y, GLfloat rot);
     void print();
     void setRotation(GLfloat value);
     void setCannonRotation(GLfloat value);

@@ -39,10 +39,11 @@ private:
     int mt;
     bool mtON;
     void movePlayer();
+    void updateGame(QString &data);
     int playerID;
     int timerInterval;
     QTcpSocket *socket;
-    bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE;
+    bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE, keySpace;
 };
 
 #endif // MAINWINDOW_H

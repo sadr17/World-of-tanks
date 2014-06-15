@@ -49,13 +49,15 @@ SOURCES       = ../game/main.cpp \
 		../game/mainwindow.cpp \
 		../game/display.cpp \
 		../game/tank.cpp \
-		../game/missile.cpp moc_mainwindow.cpp \
+		../game/missile.cpp \
+		../game/score.cpp moc_mainwindow.cpp \
 		moc_display.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		display.o \
 		tank.o \
 		missile.o \
+		score.o \
 		moc_mainwindow.o \
 		moc_display.o
 DIST          = /opt/Qt/5.3/gcc_64/mkspecs/features/spec_pre.prf \
@@ -169,7 +171,8 @@ DIST          = /opt/Qt/5.3/gcc_64/mkspecs/features/spec_pre.prf \
 		../game/mainwindow.cpp \
 		../game/display.cpp \
 		../game/tank.cpp \
-		../game/missile.cpp
+		../game/missile.cpp \
+		../game/score.cpp
 QMAKE_TARGET  = game
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = game
@@ -436,7 +439,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/game1.0.0 || mkdir -p .tmp/game1.0.0
-	$(COPY_FILE) --parents $(DIST) .tmp/game1.0.0/ && $(COPY_FILE) --parents ../game/mainwindow.h ../game/display.h ../game/tank.h ../game/missile.h .tmp/game1.0.0/ && $(COPY_FILE) --parents ../game/main.cpp ../game/mainwindow.cpp ../game/display.cpp ../game/tank.cpp ../game/missile.cpp .tmp/game1.0.0/ && $(COPY_FILE) --parents ../game/mainwindow.ui .tmp/game1.0.0/ && (cd `dirname .tmp/game1.0.0` && $(TAR) game1.0.0.tar game1.0.0 && $(COMPRESS) game1.0.0.tar) && $(MOVE) `dirname .tmp/game1.0.0`/game1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/game1.0.0
+	$(COPY_FILE) --parents $(DIST) .tmp/game1.0.0/ && $(COPY_FILE) --parents ../game/mainwindow.h ../game/display.h ../game/tank.h ../game/missile.h ../game/score.h .tmp/game1.0.0/ && $(COPY_FILE) --parents ../game/main.cpp ../game/mainwindow.cpp ../game/display.cpp ../game/tank.cpp ../game/missile.cpp ../game/score.cpp .tmp/game1.0.0/ && $(COPY_FILE) --parents ../game/mainwindow.ui .tmp/game1.0.0/ && (cd `dirname .tmp/game1.0.0` && $(TAR) game1.0.0.tar game1.0.0 && $(COMPRESS) game1.0.0.tar) && $(MOVE) `dirname .tmp/game1.0.0`/game1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/game1.0.0
 
 
 clean:compiler_clean 
@@ -587,6 +590,7 @@ moc_mainwindow.cpp: /opt/Qt/5.3/gcc_64/include/QtWidgets/QMainWindow \
 		/opt/Qt/5.3/gcc_64/include/QtCore/QDebug \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/QDesktopWidget \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt/5.3/gcc_64/include/QtWidgets/QSizePolicy \
 		../game/mainwindow.h
 	/opt/Qt/5.3/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.3/gcc_64/mkspecs/linux-g++ -I/home/tomek/dev/game/game -I/opt/Qt/5.3/gcc_64/include -I/opt/Qt/5.3/gcc_64/include/QtOpenGL -I/opt/Qt/5.3/gcc_64/include/QtWidgets -I/opt/Qt/5.3/gcc_64/include/QtNetwork -I/opt/Qt/5.3/gcc_64/include/QtGui -I/opt/Qt/5.3/gcc_64/include/QtCore -I. ../game/mainwindow.h -o moc_mainwindow.cpp
 
@@ -703,8 +707,10 @@ moc_display.cpp: /opt/Qt/5.3/gcc_64/include/QtOpenGL/QGLWidget \
 		/opt/Qt/5.3/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt/5.3/gcc_64/include/QtGui/QSurfaceFormat \
 		/opt/Qt/5.3/gcc_64/include/QtGui/qsurfaceformat.h \
+		/opt/Qt/5.3/gcc_64/include/QtCore/QDebug \
 		../game/tank.h \
 		../game/missile.h \
+		../game/score.h \
 		../game/display.h
 	/opt/Qt/5.3/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.3/gcc_64/mkspecs/linux-g++ -I/home/tomek/dev/game/game -I/opt/Qt/5.3/gcc_64/include -I/opt/Qt/5.3/gcc_64/include/QtOpenGL -I/opt/Qt/5.3/gcc_64/include/QtWidgets -I/opt/Qt/5.3/gcc_64/include/QtNetwork -I/opt/Qt/5.3/gcc_64/include/QtGui -I/opt/Qt/5.3/gcc_64/include/QtCore -I. ../game/display.h -o moc_display.cpp
 
@@ -828,8 +834,10 @@ ui_mainwindow.h: ../game/mainwindow.ui \
 		/opt/Qt/5.3/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt/5.3/gcc_64/include/QtGui/QSurfaceFormat \
 		/opt/Qt/5.3/gcc_64/include/QtGui/qsurfaceformat.h \
+		/opt/Qt/5.3/gcc_64/include/QtCore/QDebug \
 		../game/tank.h \
-		../game/missile.h
+		../game/missile.h \
+		../game/score.h
 	/opt/Qt/5.3/gcc_64/bin/uic ../game/mainwindow.ui -o ui_mainwindow.h
 
 compiler_yacc_decl_make_all:
@@ -968,6 +976,7 @@ main.o: ../game/main.cpp ../game/mainwindow.h \
 		/opt/Qt/5.3/gcc_64/include/QtCore/QDebug \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/QDesktopWidget \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt/5.3/gcc_64/include/QtWidgets/QSizePolicy \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/QApplication \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qapplication.h \
 		/opt/Qt/5.3/gcc_64/include/QtCore/qcoreapplication.h \
@@ -1102,6 +1111,7 @@ mainwindow.o: ../game/mainwindow.cpp ../game/mainwindow.h \
 		/opt/Qt/5.3/gcc_64/include/QtCore/QDebug \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/QDesktopWidget \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt/5.3/gcc_64/include/QtWidgets/QSizePolicy \
 		ui_mainwindow.h \
 		/opt/Qt/5.3/gcc_64/include/QtCore/QVariant \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/QAction \
@@ -1131,12 +1141,6 @@ mainwindow.o: ../game/mainwindow.cpp ../game/mainwindow.h \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qstyle.h \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qtabbar.h \
 		/opt/Qt/5.3/gcc_64/include/QtWidgets/qrubberband.h \
-		/opt/Qt/5.3/gcc_64/include/QtWidgets/QMenu \
-		/opt/Qt/5.3/gcc_64/include/QtWidgets/qmenu.h \
-		/opt/Qt/5.3/gcc_64/include/QtWidgets/QMenuBar \
-		/opt/Qt/5.3/gcc_64/include/QtWidgets/qmenubar.h \
-		/opt/Qt/5.3/gcc_64/include/QtWidgets/QStatusBar \
-		/opt/Qt/5.3/gcc_64/include/QtWidgets/qstatusbar.h \
 		../game/display.h \
 		/opt/Qt/5.3/gcc_64/include/QtOpenGL/QGLWidget \
 		/opt/Qt/5.3/gcc_64/include/QtOpenGL/qgl.h \
@@ -1151,7 +1155,8 @@ mainwindow.o: ../game/mainwindow.cpp ../game/mainwindow.h \
 		/opt/Qt/5.3/gcc_64/include/QtGui/QSurfaceFormat \
 		/opt/Qt/5.3/gcc_64/include/QtGui/qsurfaceformat.h \
 		../game/tank.h \
-		../game/missile.h
+		../game/missile.h \
+		../game/score.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../game/mainwindow.cpp
 
 display.o: ../game/display.cpp ../game/display.h \
@@ -1268,8 +1273,10 @@ display.o: ../game/display.cpp ../game/display.h \
 		/opt/Qt/5.3/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt/5.3/gcc_64/include/QtGui/QSurfaceFormat \
 		/opt/Qt/5.3/gcc_64/include/QtGui/qsurfaceformat.h \
+		/opt/Qt/5.3/gcc_64/include/QtCore/QDebug \
 		../game/tank.h \
-		../game/missile.h
+		../game/missile.h \
+		../game/score.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o display.o ../game/display.cpp
 
 tank.o: ../game/tank.cpp ../game/tank.h \
@@ -1504,6 +1511,9 @@ missile.o: ../game/missile.cpp ../game/missile.h \
 		/opt/Qt/5.3/gcc_64/include/QtGui/qsurfaceformat.h \
 		../game/tank.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o missile.o ../game/missile.cpp
+
+score.o: ../game/score.cpp ../game/score.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o score.o ../game/score.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp

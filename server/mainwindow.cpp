@@ -56,13 +56,14 @@ void MainWindow::onTimer()
             }
             else
             {
+                delete missileList.takeAt(i);
                 QString missileMessage = "DeleteMissile: " + QString::number(i);
                 for(int j = 0 ; j < clients.size(); ++j)
                 {
                     QTextStream out(clients[j]);
                     out << missileMessage << endl;
+                    qDebug() << "Usun pocisk";
                 }
-                delete missileList.takeAt(i);
             }
         }
     }
@@ -96,6 +97,7 @@ void MainWindow::openSession()
 void MainWindow::newConnection()
 {
     QTcpSocket* newSocket = server->nextPendingConnection();
+    if(clients.size() >= 4) return;
     if(newSocket)
     {
         clients.push_back(newSocket);
@@ -110,29 +112,31 @@ void MainWindow::newConnection()
 void MainWindow::onConnectMessage(QTcpSocket *_socket)
 {
     QTextStream out(_socket);
-    out << "PlayersOnline: " + QString::number(playersList.size()) << endl;
-    qDebug() << "PlayersOnline: " + QString::number(playersList.size());
     if(!playersList.isEmpty())
     {
-        int listSize = playersList.size();
-        playersList.append(new Tank(listSize));
-
-        for(int i = 0; i < playersList.size(); ++i)
+        for(int i = 0; i < playersList.size(); i++)
         {
-            QString message = getPlayerInfo(i);
-            out << message << endl;
-        }
-
-        QString message = "NewPlayer: " + getPlayerInfo(listSize);
-
-        for(int i = 0; i < clients.size() - 1; ++i)
-        {
-            QTextStream clientsOut(clients[i]);
-            clientsOut << message << endl;
+            QString setPlayerMessage = "SetPlayer: " + getPlayerInfo(i);
+            out << setPlayerMessage << endl;
         }
     }
-    else
-        playersList.append(new Tank(playersList.size()));
+
+    int newID = playersList.size();
+    playersList.append(new Tank(newID, defaultPosTab[newID][0], defaultPosTab[newID][1], defaultPosTab[newID][2]));
+    QString IDMessage = "IDMessage: " + getPlayerInfo(newID);
+    out << IDMessage << endl;
+
+    QString message = "NewPlayer: " + getPlayerInfo(newID);
+
+    if(newID > 0)
+    {
+        for(int i = 0; i < clients.size() - 1; ++i)
+        {
+            QTextStream clientStream(clients[i]);
+            clientStream << message << endl;
+        }
+    }
+
 }
 
 
@@ -143,55 +147,66 @@ void MainWindow::newInfo()
         if(clients[i]->isReadable() && clients[i]->bytesAvailable() > 0)
         {
             QTextStream in(clients[i]);
-            QString info = in.readLine();
-            qDebug() << "Otrzymalem info: " + info;
-            QStringList infoList = info.split(" ", QString::SkipEmptyParts);
-            int idInfo;
-            if(infoList[0] == "NewMissile:")
+            QString info;
+            do
             {
-                ui->logWindow->append("New Missile");
-                int tankID = infoList[1].toInt();
-                double missileXPos = infoList[2].toDouble();
-                double missileYPos = infoList[3].toDouble();
-                double missileDirection = infoList[4].toDouble();
-                missileList.append(new Missile(tankID, missileXPos, missileYPos, missileDirection));
-                for(int j = 0; j < clients.size(); ++j)
+                info = in.readLine();
+                if(info.isNull()) break;
+                qDebug() << "Otrzymalem info: " + info;
+                updateGame(info);
+            }
+            while (!info.isNull());
+        }
+    }
+}
+
+void MainWindow::updateGame(QString &data)
+{
+    QStringList infoList = data.split(" ", QString::SkipEmptyParts);
+    int idInfo;
+    if(infoList[0] == "NewMissile:")
+    {
+        ui->logWindow->append("New Missile");
+        int tankID = infoList[1].toInt();
+        double missileXPos = infoList[2].toDouble();
+        double missileYPos = infoList[3].toDouble();
+        double missileDirection = infoList[4].toDouble();
+        missileList.append(new Missile(tankID, missileXPos, missileYPos, missileDirection));
+        for(int j = 0; j < clients.size(); ++j)
+        {
+            if(clients[j]->isWritable())
+            {
+                QTextStream out(clients[j]);
+                for(int k = 0; k < missileList.size(); ++k)
                 {
-                    if(clients[j]->isWritable())
-                    {
-                        QTextStream out(clients[j]);
-                        for(int k = 0; k < missileList.size(); ++k)
-                        {
-                            QString message = "NewMissile: " + getMissileInfo(k);
-                            out << message << endl;
-                        }
-                    }
+                    QString message = "NewMissile: " + getMissileInfo(k);
+                    out << message << endl;
                 }
             }
-            else
+        }
+    }
+    else
+    {
+        idInfo = infoList[0].toInt();
+        double xInfo = infoList[1].toDouble();
+        double yInfo = infoList[2].toDouble();
+        playersList[idInfo]->setPos(xInfo, yInfo);
+        double rotInfo = infoList[3].toDouble();
+        playersList[idInfo]->setRotation(rotInfo);
+        double cannonRotInfo = infoList[4].toDouble();
+        playersList[idInfo]->setCannonRotation(cannonRotInfo);
+    }
+    for(int j = 0; j < clients.size(); ++j)
+    {
+        if(clients[j]->isWritable())
+        {
+            QTextStream out(clients[j]);
+            for(int k = 0; k < playersList.size(); ++k)
             {
-                idInfo = infoList[0].toInt();
-                double xInfo = infoList[1].toDouble();
-                double yInfo = infoList[2].toDouble();
-                playersList[idInfo]->setPos(xInfo, yInfo);
-                double rotInfo = infoList[3].toDouble();
-                playersList[idInfo]->setRotation(rotInfo);
-                double cannonRotInfo = infoList[4].toDouble();
-                playersList[idInfo]->setCannonRotation(cannonRotInfo);
-            }
-            for(int j = 0; j < clients.size(); ++j)
-            {
-                if(clients[j]->isWritable())
-                {
-                    QTextStream out(clients[j]);
-                    for(int k = 0; k < playersList.size(); ++k)
-                    {
-                        if(k == j) continue;
-                        QString message = getPlayerInfo(k);
-                        out << message << endl;
-                        qDebug() << "Wiadomosc do gracza [" + QString::number(j) + "]: " + message;
-                    }
-                }
+                if(k == j) continue;
+                QString message = getPlayerInfo(k);
+                out << message << endl;
+                qDebug() << "Wiadomosc do gracza [" + QString::number(j) + "]: " + message;
             }
         }
     }
@@ -222,6 +237,7 @@ void MainWindow::clientDisconnect()
             int disconnectedPlayerID = playersList[i]->id;
             delete playersList.takeAt(i);
             delete clients.takeAt(i);
+//            delete scoreboard.takeAt(i);
             ui->logWindow->append("Disconnecting client " + QString::number(i));
             if(!clients.isEmpty())
             {

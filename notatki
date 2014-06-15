@@ -8,26 +8,19 @@
 ####  0.8 -> 0.48
 ####  1.2 -> 0.72
 
-
-# Obsługa wielu klawiszy				 --Późńiej
-
-# Pociski
-#### Pociski zatrzymują się
-#### usunąć stary kod
-
-# Aspect ratio
-
 # HUD
-## Ammo
-## Pasek ladowania
-## (tab) -> pokazywanie tablicy wynikow
+## Tablica wynikow
 
 # Tablica wynikow
+##  score -> id czolgu, k/d ratio, kills, deaths
+##  lista wynikow
+##  (czy musi dziedziczyc po czolgu)? CHYBA NIE
+##  Rysowania to nacisnieciu < TAB >
 
 # Plansza 
 
 
 ### PROBLEMY ###
 
-Nie rysuje sie pocisk (Przesuwanie w timerze klienta -> OK; Przesuwanie na serwerze -> OK, Wchodzi do petli rysowania w Display -> OK)
- + czasem sie nie usuwa.
+# Pociski sie nie usuwaja
+# Czasem przy disconnecie gracza serwer pada

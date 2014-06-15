@@ -38,6 +38,25 @@ Tank::Tank(int i)
     ammo = 50;
 }
 
+Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot)
+{
+    ableToShoot = true;
+    id = i;
+    color[0] = 1;
+    color[1] = 0;
+    color[2] = 0;
+    color[3] = 1;
+    cannonColor[0] = 0;
+    cannonColor[1] = 0;
+    cannonColor[2] = 0;
+    cannonColor[3] = 1;
+    rotation = rot;
+    cannonRotation = 0;
+    xPos = x;
+    yPos = y;
+    ammo = 50;
+}
+
 bool Tank::canShoot()
 {
     return ableToShoot;

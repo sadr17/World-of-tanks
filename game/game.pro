@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
         display.cpp \
         tank.cpp \
-        missile.cpp
+        missile.cpp \
+    score.cpp
 
 HEADERS  += mainwindow.h \
     display.h \
     tank.h \
-    missile.h
+    missile.h \
+    score.h
 
 FORMS    += mainwindow.ui
