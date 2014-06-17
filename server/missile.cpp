@@ -55,8 +55,8 @@ bool Missile::canMove(double top, double right, double bottom, double left)
 
 int Missile::hit(QList<Tank *> *tanksList)
 {
-    double radius = 1.3;
-    double missileRadius = 0.2;
+    double radius = 0.6;
+    double missileRadius = 0.1;
     for(int i = 0; i < tanksList->size(); ++i)
     {
         if(i != tankID)

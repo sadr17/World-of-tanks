@@ -158,7 +158,7 @@ void Tank::rotateCannon(GLfloat value)
 
 bool Tank::canMove(GLfloat speed, QList<Tank *> *tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
 {
-    GLfloat radius = 1.2;
+    GLfloat radius = 0.4;
     GLfloat xCheck = xPos + sin(rotation*M_PI/180)*speed;
     GLfloat yCheck = yPos + cos(rotation*M_PI/180)*speed;
     for(int i = 0; i < tanksList->size(); ++i)

@@ -10,6 +10,7 @@ Tank::Tank()
     color[2] = 0;
     color[3] = 1;
     rotation = 0;
+    cannonRotation = 0;
 }
 
 Tank::Tank(int i, double x, double y, double rot)
@@ -22,6 +23,7 @@ Tank::Tank(int i, double x, double y, double rot)
     color[2] = 0;
     color[3] = 1;
     rotation = rot;
+    cannonRotation = 0;
 }
 
 double Tank::getRotation()

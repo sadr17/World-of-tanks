@@ -206,36 +206,36 @@ void MainWindow::movePlayer()
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(0.18, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
-            ui->widget->playerList[playerID]->move(0.18);
+        if(ui->widget->playerList[playerID]->canMove(0.10, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+            ui->widget->playerList[playerID]->move(0.10);
         moving = true;
     }
     else if(keyDown)
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(-0.1, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
-            ui->widget->playerList[playerID]->move(-0.1);
+        if(ui->widget->playerList[playerID]->canMove(-0.05, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+            ui->widget->playerList[playerID]->move(-0.05);
         moving = true;
     }
     if(keyLeft)
     {
-        ui->widget->playerList[playerID]->rotate(-5);
+        ui->widget->playerList[playerID]->rotate(-2);
         moving = true;
     }
     else if(keyRight)
     {
-        ui->widget->playerList[playerID]->rotate(5);
+        ui->widget->playerList[playerID]->rotate(2);
         moving = true;
     }
     if(keyE)
     {
-        ui->widget->playerList[playerID]->rotateCannon(3);
+        ui->widget->playerList[playerID]->rotateCannon(1);
         moving = true;
     }
     else if(keyQ)
     {
-        ui->widget->playerList[playerID]->rotateCannon(-3);
+        ui->widget->playerList[playerID]->rotateCannon(-1);
         moving = true;
     }
     if(keySpace)

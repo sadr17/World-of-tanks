@@ -34,9 +34,10 @@ void MainWindow::onTimer()
             int tankHitID = missileList[i]->hit(&playersList);
             if(tankHitID >= 0)
             {
+                int randomTab = rand()%4;
                 playersList[tankHitID]->setCannonRotation(0);
-                playersList[tankHitID]->setRotation(0);
-                playersList[tankHitID]->setPos(0, 0);
+                playersList[tankHitID]->setRotation(defaultPosTab[randomTab][2]);
+                playersList[tankHitID]->setPos(defaultPosTab[randomTab][0], defaultPosTab[randomTab][1]);
                 delete missileList.takeAt(i);
                 QString message = "PlayerKilled: " + getPlayerInfo(tankHitID);
                 QString missileMessage = "DeleteMissile: " + QString::number(i);
@@ -62,7 +63,6 @@ void MainWindow::onTimer()
                 {
                     QTextStream out(clients[j]);
                     out << missileMessage << endl;
-                    qDebug() << "Usun pocisk";
                 }
             }
         }
@@ -177,11 +177,8 @@ void MainWindow::updateGame(QString &data)
             if(clients[j]->isWritable())
             {
                 QTextStream out(clients[j]);
-                for(int k = 0; k < missileList.size(); ++k)
-                {
-                    QString message = "NewMissile: " + getMissileInfo(k);
-                    out << message << endl;
-                }
+                QString message = "NewMissile: " + getMissileInfo(missileList.size() - 1);
+                out << message << endl;
             }
         }
     }
@@ -236,7 +233,7 @@ void MainWindow::clientDisconnect()
         {
             int disconnectedPlayerID = playersList[i]->id;
             delete playersList.takeAt(i);
-            delete clients.takeAt(i);
+            clients.takeAt(i)->deleteLater();
 //            delete scoreboard.takeAt(i);
             ui->logWindow->append("Disconnecting client " + QString::number(i));
             if(!clients.isEmpty())
