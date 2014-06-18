@@ -17,12 +17,14 @@ SOURCES += main.cpp\
         display.cpp \
         tank.cpp \
         missile.cpp \
-    score.cpp
+    score.cpp \
+    obstacle.cpp
 
 HEADERS  += mainwindow.h \
     display.h \
     tank.h \
     missile.h \
-    score.h
+    score.h \
+    obstacle.h
 
 FORMS    += mainwindow.ui

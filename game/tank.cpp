@@ -156,9 +156,9 @@ void Tank::rotateCannon(GLfloat value)
     cannonRotation = (int)(cannonRotation + value)%360;
 }
 
-bool Tank::canMove(GLfloat speed, QList<Tank *> *tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
+bool Tank::canMove(GLfloat speed, QList<Tank *> *tanksList, QList<Obstacle *> *map, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
 {
-    GLfloat radius = 0.4;
+    GLfloat radius = 0.75;
     GLfloat xCheck = xPos + sin(rotation*M_PI/180)*speed;
     GLfloat yCheck = yPos + cos(rotation*M_PI/180)*speed;
     for(int i = 0; i < tanksList->size(); ++i)
@@ -172,6 +172,16 @@ bool Tank::canMove(GLfloat speed, QList<Tank *> *tanksList, GLfloat top, GLfloat
                 return false;
         }
     }
+
+    for(int i = 0; i < map->size(); ++i)
+    {
+        GLfloat xVector = xCheck - map->at(i)->getX();
+        GLfloat yVector = yCheck - map->at(i)->getY();
+        GLfloat vector = sqrt(xVector*xVector + yVector*yVector);
+        if(vector <= radius + map->at(i)->getRad())
+            return false;
+    }
+
     return xCheck > (left + offset) && xCheck < (right - offset) && yCheck > (bottom + offset) && yCheck < (top - offset);
 }
 

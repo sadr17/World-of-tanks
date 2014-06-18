@@ -1,15 +1,17 @@
 #ifndef SCORE_H
 #define SCORE_H
 
+#include <QString>
+
 class Score
 {
 public:
     Score();
     Score(int i);
-    void addKill();
-    void addDeath();
+    Score(int i, int k, int d);
     void setDeaths(int value);
     void setKills(int value);
+    QString toString();
     int tankID;
 private:
     int kills;

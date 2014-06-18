@@ -1,4 +1,5 @@
 #include "display.h"
+#include <QPainter>
 
 Display::Display(QWidget *parent) :
     QGLWidget(parent)
@@ -14,6 +15,8 @@ Display::Display(QWidget *parent) :
     ammoHud = "50";
     ammoProgress = 1.0;
     drawScore = false;
+
+    createMap();
 }
 
 void Display::resizeGL(int w, int h)
@@ -38,6 +41,10 @@ void Display::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0,0,-10);
+    for(int i = map.size() - 1; i >= 0; --i)
+    {
+        map[i]->print();
+    }
     for(int i = playerList.size() - 1; i >= 0; --i)
     {
         playerList[i]->print();
@@ -52,10 +59,13 @@ void Display::paintGL()
 
 void Display::drawHudBar()
 {
+    QFont font("DejaVu Sans", 12, QFont::Light, false);
     glPushMatrix();
         // Ammo status
-        qglColor(Qt::white);
-        renderText(-31, -17.7, -4, ammoHud + "/50", QFont("Arial", 12, QFont::Normal, false));
+        glPushMatrix();
+            qglColor(Qt::white);
+            renderText(-31, -17.7, -4, ammoHud + "/50", font);
+        glPopMatrix();
         // Ammo bar
         GLdouble progress = 18 * ammoProgress;
         glBegin(GL_POLYGON);
@@ -78,18 +88,32 @@ void Display::drawHudBar()
 
 void Display::drawScoreboard()
 {
+    QFont font("Droid Sans", 12, QFont::Light);
     glPushMatrix();
-        qglColor(Qt::white);
-        renderText(-29, 11.0, -8, "Tablica wyników", QFont("Arial", 12, QFont::Normal, false));
-        glTranslated(0.0, 0.0, 2.0);
-        glBegin(GL_POLYGON);
-        glColor4f(0, 0, 0, 0.8);
-        glVertex2d(-32.0, 12.0);
-        glVertex2d(-20.0, 12.0);
-        glVertex2d(-20.0, -12.0);
-        glVertex2d(-32.0, -12.0);
-        glEnd();
+    qglColor(Qt::white);
+    renderText(-29, 11.0, -8, "Tablica wyników", font);
+    glPushMatrix();
+        for(int i = 0; i < scoreboard.size(); ++i)
+        {
+            glTranslated(0.0, -2.0, 0.0);
+            renderText(-29, 11.0, -8, "ID: " + scoreboard[i]->toString(), font);
+        }
     glPopMatrix();
+    glTranslated(0.0, 0.0, 2.0);
+    glBegin(GL_POLYGON);
+    glColor4f(0, 0, 0, 0.8);
+    glVertex2d(-32.0, 12.0);
+    glVertex2d(-20.0, 12.0);
+    glVertex2d(-20.0, -12.0);
+    glVertex2d(-32.0, -12.0);
+    glEnd();
+    glPopMatrix();
+}
+
+void Display::createMap()
+{
+    map.append(new Obstacle(0, 0, 5.0));
+    map.append(new Obstacle(-10, 3, 3.0));
 }
 
 Display::~Display()
@@ -98,4 +122,8 @@ Display::~Display()
         delete playerList.takeFirst();
     while(!missileList.isEmpty())
         delete missileList.takeFirst();
+    while(!scoreboard.isEmpty())
+        delete scoreboard.takeFirst();
+    while(!map.isEmpty())
+        delete map.takeFirst();
 }

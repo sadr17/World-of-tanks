@@ -3,13 +3,6 @@
 Score::Score()
 {
     kills = deaths = 0;
-    tankID = 0;
-}
-
-Score::Score(int i)
-{
-    tankID = i;
-    kills = deaths = 0;
 }
 
 void Score::addDeath()
@@ -22,7 +15,12 @@ void Score::addKill()
     kills++;
 }
 
-void Score::setID(int i)
+int Score::getDeaths()
 {
-    tankID = i;
+    return deaths;
+}
+
+int Score::getKills()
+{
+    return kills;
 }

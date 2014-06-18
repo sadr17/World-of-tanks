@@ -3,6 +3,8 @@
 #include <QGLWidget>
 #include <math.h>
 
+#include <obstacle.h>
+
 class Tank
 {
 public:
@@ -25,7 +27,7 @@ public:
     bool canShoot();
     void canShoot(bool value);
     void takeAmmo(int value);
-    bool canMove(GLfloat speed,QList<Tank *> *tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
+    bool canMove(GLfloat speed, QList<Tank *> *tanksList, QList<Obstacle *> *map, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
     int id;
 private:
     GLfloat xPos, yPos;

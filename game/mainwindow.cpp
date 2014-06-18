@@ -120,14 +120,13 @@ void MainWindow::updateGame(QString &data)
     if(info[0] == "NewPlayer:")
     {
         int idInfo = info[1].toInt();
-        ui->widget->playerList.append(new Tank(idInfo));
         GLfloat xPosInfo = (GLfloat)info[2].toDouble();
         GLfloat yPosInfo = (GLfloat)info[3].toDouble();
         GLfloat rotInfo = (GLfloat)info[4].toDouble();
         GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
-        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
-        ui->widget->playerList[idInfo]->setRotation(rotInfo);
+        ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
         ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+        ui->widget->scoreboard.append(new Score(idInfo));
     }
     else if(info[0] == "SetPlayer:")
     {
@@ -136,8 +135,11 @@ void MainWindow::updateGame(QString &data)
         GLfloat yPosInfo = (GLfloat)info[3].toDouble();
         GLfloat rotInfo = (GLfloat)info[4].toDouble();
         GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
+        int killsInfo = info[6].toInt();
+        int deathsInfo = info[7].toInt();
         ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
         ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+        ui->widget->scoreboard.append(new Score(idInfo, killsInfo, deathsInfo));
     }
     else if(info[0] == "IDMessage:")
     {
@@ -147,6 +149,7 @@ void MainWindow::updateGame(QString &data)
         GLfloat rotInfo = (GLfloat)info[4].toDouble();
         playerID = idInfo;
         ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
+        ui->widget->scoreboard.append(new Score(playerID));
     }
     else if(info[0] == "NewMissile:")
     {
@@ -165,11 +168,12 @@ void MainWindow::updateGame(QString &data)
     {
         int idInfo = info[1].toInt();
         delete ui->widget->playerList.takeAt(idInfo);
+        delete ui->widget->scoreboard.takeAt(idInfo);
         if(playerID > idInfo)
         {
             playerID--;
             ui->widget->playerList[playerID]->id--;
-//            ui->widget->scoreboard[playerID]->tankID--;
+            ui->widget->scoreboard[playerID]->tankID--;
         }
     }
     else if(info[0] == "PlayerKilled:")
@@ -183,10 +187,17 @@ void MainWindow::updateGame(QString &data)
         ui->widget->playerList[idInfo]->setRotation(rotInfo);
         ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
     }
+    else if(info[0] == "UpdateScoreboard:")
+    {
+        int idInfo = info[1].toInt();
+        int killsInfo = info[2].toInt();
+        int deathsInfo = info[3].toInt();
+        ui->widget->scoreboard[idInfo]->setKills(killsInfo);
+        ui->widget->scoreboard[idInfo]->setDeaths(deathsInfo);
+    }
     else
     {
         int idInfo = info[0].toInt();
-        qDebug() << "Przesuwam gracza nr: " + info[0];
         GLfloat xPosInfo = (GLfloat)info[1].toDouble();
         GLfloat yPosInfo = (GLfloat)info[2].toDouble();
         GLfloat rotInfo = (GLfloat)info[3].toDouble();
@@ -206,7 +217,7 @@ void MainWindow::movePlayer()
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(0.10, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(0.10, &ui->widget->playerList, &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(0.10);
         moving = true;
     }
@@ -214,7 +225,7 @@ void MainWindow::movePlayer()
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(-0.05, &ui->widget->playerList, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(-0.05, &ui->widget->playerList, &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(-0.05);
         moving = true;
     }
@@ -243,9 +254,9 @@ void MainWindow::movePlayer()
         if(ui->widget->playerList[playerID]->hasAmmo() && ui->widget->playerList[playerID]->canShoot())
         {
             missileMessage = "NewMissile: " + QString::number(playerID) + " " +
-                                     QString::number(ui->widget->playerList[playerID]->getXPos()) + " " +
-                                     QString::number(ui->widget->playerList[playerID]->getYPos()) + " " +
-                                     QString::number(ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation());
+                             QString::number(ui->widget->playerList[playerID]->getXPos()) + " " +
+                             QString::number(ui->widget->playerList[playerID]->getYPos()) + " " +
+                             QString::number(ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation());
             ui->widget->playerList[playerID]->takeAmmo(1);
             ui->widget->ammoHud = ui->widget->playerList[playerID]->ammoText();
             ui->widget->ammoProgress = 0;

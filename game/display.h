@@ -6,6 +6,7 @@
 #include "tank.h"
 #include "missile.h"
 #include "score.h"
+#include "obstacle.h"
 
 class Display : public QGLWidget
 {
@@ -15,6 +16,7 @@ public:
     QList<Tank *> playerList;
     QList<Missile *> missileList;
     QList<Score *> scoreboard;
+    QList<Obstacle *> map;
     ~Display();
     GLint mapWidth;
     GLint mapHeight;
@@ -23,6 +25,7 @@ public:
     bool drawScore;
 private:
     void paintGL();
+    void createMap();
     void initializeGL();
     void resizeGL(int w, int h);
     void drawHudBar();

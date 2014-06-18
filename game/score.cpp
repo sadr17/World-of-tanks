@@ -12,14 +12,11 @@ Score::Score(int i)
     deaths = 0;
 }
 
-void Score::addKill()
+Score::Score(int i, int k, int d)
 {
-    kills++;
-}
-
-void Score::addDeath()
-{
-    deaths++;
+    tankID = i;
+    kills = k;
+    deaths = d;
 }
 
 void Score::setDeaths(int value)
@@ -30,4 +27,9 @@ void Score::setDeaths(int value)
 void Score::setKills(int value)
 {
     kills = value;
+}
+
+QString Score::toString()
+{
+    return QString::number(tankID + 1) + " - " + QString::number(kills) + "/" + QString::number(deaths);
 }

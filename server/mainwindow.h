@@ -36,6 +36,7 @@ private:
     void onConnectMessage(QTcpSocket *_socket);
     QString getPlayerInfo(int id);
     QString getMissileInfo(int id);
+    QString getScoreInfo(int id, bool shorten = false);
     QTimer gameTimer;
     int timerInterval;
 private slots:

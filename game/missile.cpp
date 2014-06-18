@@ -18,6 +18,7 @@ Missile::Missile(GLfloat x, GLfloat y, GLfloat direction)
     angle = direction;
     speed = 0.7;
 }
+
 GLfloat Missile::getXPos()
 {
     return xPos;

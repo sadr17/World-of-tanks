@@ -5,14 +5,13 @@ class Score
 {
 public:
     Score();
-    Score(int i);
     void addKill();
     void addDeath();
-    void setID(int i);
+    int getKills();
+    int getDeaths();
 private:
     int kills;
     int deaths;
-    int tankID;
 };
 
 #endif // SCORE_H

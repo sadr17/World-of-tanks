@@ -38,16 +38,23 @@ void MainWindow::onTimer()
                 playersList[tankHitID]->setCannonRotation(0);
                 playersList[tankHitID]->setRotation(defaultPosTab[randomTab][2]);
                 playersList[tankHitID]->setPos(defaultPosTab[randomTab][0], defaultPosTab[randomTab][1]);
+                int killerID = missileList[i]->tankID;
+                scoreboard[tankHitID]->addDeath();
+                scoreboard[killerID]->addKill();
                 delete missileList.takeAt(i);
-                QString message = "PlayerKilled: " + getPlayerInfo(tankHitID);
+                QString message = getPlayerInfo(tankHitID);
                 QString missileMessage = "DeleteMissile: " + QString::number(i);
+                QString killerMessage = "UpdateScoreboard: " + getScoreInfo(killerID);
+                QString victimMessage = "UpdateScoreboard: " + getScoreInfo(tankHitID);
                 for(int j = 0; j < clients.size(); ++j)
                 {
                     QTextStream out(clients[j]);
-                    out << message << endl;
-                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
                     out << missileMessage << endl;
                     ui->logWindow->append("Message send to client " + QString::number(j) + ": " + missileMessage);
+                    out << message << endl;
+                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
+                    out << killerMessage << endl;
+                    out << victimMessage << endl;
                 }
                 continue;
             }
@@ -116,13 +123,14 @@ void MainWindow::onConnectMessage(QTcpSocket *_socket)
     {
         for(int i = 0; i < playersList.size(); i++)
         {
-            QString setPlayerMessage = "SetPlayer: " + getPlayerInfo(i);
+            QString setPlayerMessage = "SetPlayer: " + getPlayerInfo(i) + " " + getScoreInfo(i, true);
             out << setPlayerMessage << endl;
         }
     }
 
     int newID = playersList.size();
     playersList.append(new Tank(newID, defaultPosTab[newID][0], defaultPosTab[newID][1], defaultPosTab[newID][2]));
+    scoreboard.append(new Score());
     QString IDMessage = "IDMessage: " + getPlayerInfo(newID);
     out << IDMessage << endl;
 
@@ -225,6 +233,15 @@ QString MainWindow::getMissileInfo(int id)
            QString::number(missileList[id]->getDirection());
 }
 
+QString MainWindow::getScoreInfo(int id, bool shorten)
+{
+    QString returnString = "";
+    if(!shorten) returnString += QString::number(id) + " ";
+    returnString += QString::number(scoreboard[id]->getKills()) + " " +
+                    QString::number(scoreboard[id]->getDeaths());
+    return returnString;
+}
+
 void MainWindow::clientDisconnect()
 {
     for(int i = clients.size() - 1; i >= 0; --i)
@@ -234,7 +251,7 @@ void MainWindow::clientDisconnect()
             int disconnectedPlayerID = playersList[i]->id;
             delete playersList.takeAt(i);
             clients.takeAt(i)->deleteLater();
-//            delete scoreboard.takeAt(i);
+            delete scoreboard.takeAt(i);
             ui->logWindow->append("Disconnecting client " + QString::number(i));
             if(!clients.isEmpty())
             {
