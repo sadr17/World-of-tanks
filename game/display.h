@@ -23,13 +23,14 @@ public:
     QString ammoHud;
     GLdouble ammoProgress;
     bool drawScore;
+    int gameTimer;
 private:
     void paintGL();
-    void createMap();
     void initializeGL();
     void resizeGL(int w, int h);
     void drawHudBar();
     void drawScoreboard();
+    void drawTimer();
     GLfloat bColor[4];
 signals:
 

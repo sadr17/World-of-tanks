@@ -2,6 +2,7 @@
 #define MISSILE_H
 #include "tank.h"
 #include "math.h"
+#include "obstacle.h"
 #include <QList>
 
 class Missile
@@ -17,7 +18,7 @@ public:
     int tankID;
     void move();
     int hit(QList<Tank*> *tanksList);
-    bool canMove(double top, double right, double bottom, double left);
+    bool canMove(double top, double right, double bottom, double left, QList<Obstacle *> *map);
 private:
     double speed;
     double xPos, yPos;

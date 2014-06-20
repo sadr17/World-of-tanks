@@ -7,6 +7,7 @@
 #include "tank.h"
 #include "missile.h"
 #include "score.h"
+#include "obstacle.h"
 
 namespace Ui {
 class MainWindow;
@@ -25,8 +26,10 @@ private:
     QList<Tank *> playersList;
     QList<Missile *> missileList;
     QList<Score *> scoreboard;
+    QList<Obstacle *> map;
     double defaultPosTab[4][3];
     void setDefaultPos();
+    void setupMap();
     void updateGame(QString &data);
 
     QTcpServer *server;
@@ -39,6 +42,8 @@ private:
     QString getScoreInfo(int id, bool shorten = false);
     QTimer gameTimer;
     int timerInterval;
+    int roundTimer;
+    bool roundTimerEnabled;
 private slots:
     void openSession();
     void onTimer();

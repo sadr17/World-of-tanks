@@ -15,8 +15,7 @@ Display::Display(QWidget *parent) :
     ammoHud = "50";
     ammoProgress = 1.0;
     drawScore = false;
-
-    createMap();
+    gameTimer = 0;
 }
 
 void Display::resizeGL(int w, int h)
@@ -31,8 +30,8 @@ void Display::resizeGL(int w, int h)
 void Display::initializeGL()
 {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
     glClearColor(bColor[0], bColor[1], bColor[2], bColor[3]);
+    glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -55,6 +54,7 @@ void Display::paintGL()
     }
     drawHudBar();
     if (drawScore) drawScoreboard();
+    drawTimer();
 }
 
 void Display::drawHudBar()
@@ -90,30 +90,38 @@ void Display::drawScoreboard()
 {
     QFont font("Droid Sans", 12, QFont::Light);
     glPushMatrix();
-    qglColor(Qt::white);
-    renderText(-29, 11.0, -8, "Tablica wyników", font);
-    glPushMatrix();
-        for(int i = 0; i < scoreboard.size(); ++i)
-        {
-            glTranslated(0.0, -2.0, 0.0);
-            renderText(-29, 11.0, -8, "ID: " + scoreboard[i]->toString(), font);
-        }
-    glPopMatrix();
-    glTranslated(0.0, 0.0, 2.0);
-    glBegin(GL_POLYGON);
-    glColor4f(0, 0, 0, 0.8);
-    glVertex2d(-32.0, 12.0);
-    glVertex2d(-20.0, 12.0);
-    glVertex2d(-20.0, -12.0);
-    glVertex2d(-32.0, -12.0);
-    glEnd();
+        qglColor(Qt::white);
+        renderText(-29, 11.0, -8, "Tablica wyników", font);
+        glPushMatrix();
+            for(int i = 0; i < scoreboard.size(); ++i)
+            {
+                glTranslated(0.0, -2.0, 0.0);
+                renderText(-29, 11.0, -8, "ID: " + scoreboard[i]->toString(), font);
+            }
+        glPopMatrix();
+        glTranslated(0.0, 0.0, 2.0);
+        glBegin(GL_POLYGON);
+        glColor4f(0, 0, 0, 0.8);
+        glVertex2d(-32.0, 12.0);
+        glVertex2d(-20.0, 12.0);
+        glVertex2d(-20.0, -12.0);
+        glVertex2d(-32.0, -12.0);
+        glEnd();
     glPopMatrix();
 }
 
-void Display::createMap()
+void Display::drawTimer()
 {
-    map.append(new Obstacle(0, 0, 5.0));
-    map.append(new Obstacle(-10, 3, 3.0));
+    int minutes = gameTimer/(60*1000);
+    int seconds = (gameTimer/1000)%60;
+    QString mins = QString::number(minutes);
+    QString sec = QString::number(seconds);
+    qDebug() << mins + ":" + sec;
+    QFont font("DejaVu Sans", 12, QFont::Light, false);
+    glPushMatrix();
+        qglColor(Qt::white);
+        renderText(30,-17.7, -4, mins + ":" + sec, font);
+    glPopMatrix();
 }
 
 Display::~Display()

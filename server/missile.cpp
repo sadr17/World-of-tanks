@@ -46,10 +46,18 @@ void Missile::move()
     yPos += cos(angle*M_PI/180)*speed;
 }
 
-bool Missile::canMove(double top, double right, double bottom, double left)
+bool Missile::canMove(double top, double right, double bottom, double left, QList<Obstacle *> *map)
 {
     double xCheck = xPos + sin(angle*M_PI/180)*speed;
     double yCheck = yPos + cos(angle*M_PI/180)*speed;
+    for(int i = 0; i < map->size(); ++i)
+    {
+        double xVector = xCheck - map->at(i)->getX();
+        double yVector = yCheck - map->at(i)->getY();
+        double vector = sqrt(xVector*xVector + yVector*yVector);
+        if(vector <= 0.1 + map->at(i)->getRad())
+            return false;
+    }
     return xCheck > left && xCheck < right && yCheck > bottom && yCheck < top;
 }
 

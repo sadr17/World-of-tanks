@@ -35,6 +35,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTimer timer;
+    int roundTimer;
+    bool roundTimerEnabled;
     void connectBox();
     int mt;
     bool mtON;

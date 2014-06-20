@@ -16,17 +16,39 @@ MainWindow::MainWindow(QWidget *parent) :
     gameTimer.setInterval(timerInterval);
     connect(&gameTimer,SIGNAL(timeout()),this,SLOT(onTimer()));
     gameTimer.start();
+    roundTimer = 2*60*1000;
+    roundTimerEnabled = false;
     // Default position tab
     setDefaultPos();
+    setupMap();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    while(!map.isEmpty())
+        delete map.takeFirst();
+    while(!playersList.isEmpty())
+        delete playersList.takeFirst();
+    while(!clients.isEmpty())
+        delete clients.takeFirst();
+    while(!scoreboard.isEmpty())
+        delete scoreboard.takeFirst();
 }
 
 void MainWindow::onTimer()
 {
+    // Main game timer
+    if(roundTimerEnabled)
+    {
+        roundTimer -= timerInterval;
+        if(roundTimer <= 0)
+        {
+            roundTimer = 0;
+            roundTimerEnabled = false;
+        }
+    }
+    // Missiles
     if(!missileList.isEmpty())
     {
         for(int i = missileList.size() - 1; i >= 0 ;--i)
@@ -50,15 +72,13 @@ void MainWindow::onTimer()
                 {
                     QTextStream out(clients[j]);
                     out << missileMessage << endl;
-                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + missileMessage);
                     out << message << endl;
-                    ui->logWindow->append("Message send to client " + QString::number(j) + ": " + message);
                     out << killerMessage << endl;
                     out << victimMessage << endl;
                 }
                 continue;
             }
-            if(missileList[i]->canMove(18, 32, -16.8, -32))
+            if(missileList[i]->canMove(18, 32, -16.8, -32, &map))
             {
                 missileList[i]->move();
             }
@@ -119,6 +139,16 @@ void MainWindow::newConnection()
 void MainWindow::onConnectMessage(QTcpSocket *_socket)
 {
     QTextStream out(_socket);
+
+    if(!map.isEmpty())
+    {
+        for(int i = 0; i < map.size(); ++i)
+        {
+            QString message = "Map: " + map[i]->getData();
+            out << message << endl;
+        }
+    }
+
     if(!playersList.isEmpty())
     {
         for(int i = 0; i < playersList.size(); i++)
@@ -129,6 +159,10 @@ void MainWindow::onConnectMessage(QTcpSocket *_socket)
     }
 
     int newID = playersList.size();
+
+    // Enable game timer on first player join
+    if(newID == 0) roundTimerEnabled = true;
+
     playersList.append(new Tank(newID, defaultPosTab[newID][0], defaultPosTab[newID][1], defaultPosTab[newID][2]));
     scoreboard.append(new Score());
     QString IDMessage = "IDMessage: " + getPlayerInfo(newID);
@@ -145,6 +179,8 @@ void MainWindow::onConnectMessage(QTcpSocket *_socket)
         }
     }
 
+    QString timeMessage = "Time: " + QString::number(roundTimer);
+    out << timeMessage << endl;
 }
 
 
@@ -159,8 +195,7 @@ void MainWindow::newInfo()
             do
             {
                 info = in.readLine();
-                if(info.isNull()) break;
-                qDebug() << "Otrzymalem info: " + info;
+                if(info.isEmpty()) break;
                 updateGame(info);
             }
             while (!info.isNull());
@@ -268,6 +303,11 @@ void MainWindow::clientDisconnect()
                     }
                 }
             }
+            else
+            {
+                roundTimerEnabled = false;
+                roundTimer = 40*1000;
+            }
             break;
         }
     }
@@ -290,4 +330,13 @@ void MainWindow::setDefaultPos()
     defaultPosTab[3][0] = -15;
     defaultPosTab[3][1] = -15;
     defaultPosTab[3][2] = 50;
+}
+
+void MainWindow::setupMap()
+{
+    map.append(new Obstacle(0, 0, 3.5));
+    map.append(new Obstacle(-10, -2, 3.5));
+    map.append(new Obstacle(10, 3, 3.5));
+    map.append(new Obstacle(15, 0, 3.5));
+    map.append(new Obstacle(-3, 1, 3.5));
 }

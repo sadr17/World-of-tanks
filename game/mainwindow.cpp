@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer.start();
     mt = 0;
     mtON = false;
+    roundTimerEnabled = false;
 }
 
 MainWindow::~MainWindow()
@@ -52,6 +53,7 @@ void MainWindow::infoReceived()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+
     switch(event->key())
     {
         case Qt::Key_Up:
@@ -195,6 +197,19 @@ void MainWindow::updateGame(QString &data)
         ui->widget->scoreboard[idInfo]->setKills(killsInfo);
         ui->widget->scoreboard[idInfo]->setDeaths(deathsInfo);
     }
+    else if(info[0] == "Map:")
+    {
+        GLfloat xPosInfo = (GLfloat)info[1].toFloat();
+        GLfloat yPosInfo = (GLfloat)info[2].toFloat();
+        GLfloat radInfo = (GLfloat)info[3].toFloat();
+        ui->widget->map.append(new Obstacle(xPosInfo, yPosInfo, radInfo));
+    }
+    else if(info[0] == "Time:")
+    {
+        int timeInfo = info[1].toInt();
+        ui->widget->gameTimer = timeInfo;
+        roundTimerEnabled = true;
+    }
     else
     {
         int idInfo = info[0].toInt();
@@ -210,6 +225,7 @@ void MainWindow::updateGame(QString &data)
 
 void MainWindow::movePlayer()
 {
+    if(!roundTimerEnabled) return;
     bool moving = false;
     bool shooting = false;
     QString message, missileMessage;
@@ -278,15 +294,12 @@ void MainWindow::movePlayer()
                     + " " + QString::number(ui->widget->playerList[playerID]->getRotation())
                     + " " + QString::number(ui->widget->playerList[playerID]->getCannonRotation());
             out << message << endl;
-            qDebug() << "Wysylam wiadomosc: " + message;
         }
         if(shooting)
         {
             out << missileMessage << endl;
-            qDebug() << "Wysylam wiadomosc o nowym pocisku: " + missileMessage;
         }
     }
-
 }
 
 void MainWindow::connectBox()
@@ -307,6 +320,15 @@ void MainWindow::connectBox()
 
 void MainWindow::onTimer()
 {
+    if(roundTimerEnabled)
+    {
+        ui->widget->gameTimer -= timerInterval;
+        if(ui->widget->gameTimer <= 0)
+        {
+            ui->widget->gameTimer = 0;
+            roundTimerEnabled = false;
+        }
+    }
     movePlayer();
     if(mtON)
     {
@@ -329,7 +351,6 @@ void MainWindow::onTimer()
         for(int i = ui->widget->missileList.size()-1; i >= 0; --i)
         {
             ui->widget->missileList[i]->move();
-            qDebug() << "Przesuwam pocisk " + QString::number(i);
         }
     }
     ui->widget->updateGL();
