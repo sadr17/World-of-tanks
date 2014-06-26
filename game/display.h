@@ -2,7 +2,6 @@
 #define DISPLAY_H
 
 #include <QGLWidget>
-#include <QDebug>
 #include "tank.h"
 #include "missile.h"
 #include "score.h"

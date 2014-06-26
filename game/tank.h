@@ -2,7 +2,6 @@
 #define TANK_H
 #include <QGLWidget>
 #include <math.h>
-
 #include <obstacle.h>
 
 class Tank

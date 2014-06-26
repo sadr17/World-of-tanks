@@ -7,7 +7,6 @@
 #include <QInputDialog>
 #include <QTimer>
 #include <QDir>
-#include <QDebug>
 #include <QDesktopWidget>
 #include <QSizePolicy>
 

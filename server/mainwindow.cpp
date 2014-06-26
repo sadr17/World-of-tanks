@@ -241,7 +241,6 @@ void MainWindow::updateGame(QString &data)
     int idInfo;
     if(infoList[0] == "NewMissile:")
     {
-        ui->logWindow->append("New Missile");
         int tankID = infoList[1].toInt();
         double missileXPos = infoList[2].toDouble();
         double missileYPos = infoList[3].toDouble();
@@ -278,7 +277,6 @@ void MainWindow::updateGame(QString &data)
                 if(k == j) continue;
                 QString message = getPlayerInfo(k);
                 out << message << endl;
-                qDebug() << "Wiadomosc do gracza [" + QString::number(j) + "]: " + message;
             }
         }
     }
