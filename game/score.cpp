@@ -31,5 +31,21 @@ void Score::setKills(int value)
 
 QString Score::toString()
 {
-    return QString::number(tankID + 1) + " - " + QString::number(kills) + "/" + QString::number(deaths);
+    return QString::number(tankID + 1) + " [" + QString::number(kills) + "/" + QString::number(deaths) + "]";
+}
+
+void Score::reset()
+{
+    deaths = 0;
+    kills = 0;
+}
+
+int Score::getKills()
+{
+    return kills;
+}
+
+int Score::getDeaths()
+{
+    return deaths;
 }

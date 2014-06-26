@@ -16,11 +16,14 @@ MainWindow::MainWindow(QWidget *parent) :
     gameTimer.setInterval(timerInterval);
     connect(&gameTimer,SIGNAL(timeout()),this,SLOT(onTimer()));
     gameTimer.start();
-    roundTimer = 2*60*1000;
+    roundTimer = 5*60*1000;
     roundTimerEnabled = false;
     // Default position tab
     setDefaultPos();
     setupMap();
+    // Default game status
+    roundEnd = false;
+    roundEndTimer = 0;
 }
 
 MainWindow::~MainWindow()
@@ -39,6 +42,29 @@ MainWindow::~MainWindow()
 void MainWindow::onTimer()
 {
     // Main game timer
+    if(roundEnd)
+    {
+        roundEndTimer += timerInterval;
+        if(roundEndTimer >= 10000)
+        {
+            roundTimer = 5*60*1000;
+            resetGame();
+
+            for(int j = 0; j < clients.size(); ++j)
+            {
+                QTextStream out(clients[j]);
+                out << "StartRound" << endl;
+                out << "Time: " + QString::number(roundTimer) << endl;
+                for(int i = playersList.size() - 1; i >= 0; --i)
+                {
+                    out << getPlayerInfo(i) << endl;
+                }
+            }
+            roundTimerEnabled = true;
+            roundEnd = false;
+            roundEndTimer = 0;
+        }
+    }
     if(roundTimerEnabled)
     {
         roundTimer -= timerInterval;
@@ -46,6 +72,12 @@ void MainWindow::onTimer()
         {
             roundTimer = 0;
             roundTimerEnabled = false;
+            for(int j = 0; j < clients.size(); ++j)
+            {
+                QTextStream out(clients[j]);
+                out << "RoundFinished" << endl;
+            }
+            roundEnd = true;
         }
     }
     // Missiles
@@ -306,10 +338,25 @@ void MainWindow::clientDisconnect()
             else
             {
                 roundTimerEnabled = false;
-                roundTimer = 40*1000;
+                roundTimer = 5*60*1000;
             }
             break;
         }
+    }
+}
+
+void MainWindow::resetGame()
+{
+    for(int i = 0; i < scoreboard.size(); ++i)
+    {
+        scoreboard[i]->reset();
+    }
+
+    for(int i = playersList.size() - 1; i >= 0; --i)
+    {
+        playersList[i]->setPos(defaultPosTab[i][0], defaultPosTab[i][1]);
+        playersList[i]->setRotation(defaultPosTab[i][2]);
+        playersList[i]->setCannonRotation(0);
     }
 }
 

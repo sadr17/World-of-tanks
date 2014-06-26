@@ -31,6 +31,7 @@ private:
     void setDefaultPos();
     void setupMap();
     void updateGame(QString &data);
+    void resetGame();
 
     QTcpServer *server;
     QNetworkSession *networkSession;
@@ -44,6 +45,8 @@ private:
     int timerInterval;
     int roundTimer;
     bool roundTimerEnabled;
+    bool roundEnd;
+    int roundEndTimer;
 private slots:
     void openSession();
     void onTimer();

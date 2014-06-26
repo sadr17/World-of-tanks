@@ -11,6 +11,9 @@ public:
     Score(int i, int k, int d);
     void setDeaths(int value);
     void setKills(int value);
+    void reset();
+    int getKills();
+    int getDeaths();
     QString toString();
     int tankID;
 private:

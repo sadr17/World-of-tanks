@@ -20,17 +20,18 @@ public:
     ~Display();
     GLint mapWidth;
     GLint mapHeight;
-    QString ammoHud;
     GLdouble ammoProgress;
-    bool drawScore;
     int gameTimer;
+    bool gameStatus; // true - playing, false - round finished
+    int playerID;
 private:
     void paintGL();
     void initializeGL();
     void resizeGL(int w, int h);
     void drawHudBar();
-    void drawScoreboard();
+    void drawSmallScoreboard();
     void drawTimer();
+    void drawResults();
     GLfloat bColor[4];
 signals:
 

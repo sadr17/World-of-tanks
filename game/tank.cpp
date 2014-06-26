@@ -15,7 +15,6 @@ Tank::Tank()
     xPos = 0;
     yPos = 0;
     cannonRotation = 0;
-    ammo = 50;
     ableToShoot = true;
 }
 
@@ -35,7 +34,6 @@ Tank::Tank(int i)
     cannonRotation = 0;
     xPos = 0;
     yPos = 0;
-    ammo = 50;
 }
 
 Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot)
@@ -54,7 +52,6 @@ Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot)
     cannonRotation = 0;
     xPos = x;
     yPos = y;
-    ammo = 50;
 }
 
 bool Tank::canShoot()
@@ -185,20 +182,16 @@ bool Tank::canMove(GLfloat speed, QList<Tank *> *tanksList, QList<Obstacle *> *m
     return xCheck > (left + offset) && xCheck < (right - offset) && yCheck > (bottom + offset) && yCheck < (top - offset);
 }
 
-bool Tank::hasAmmo()
+void Tank::setColor(GLfloat red, GLfloat green, GLfloat blue)
 {
-    if(ammo > 0)
-        return true;
-    else
-        return false;
+    color[0] = red/255;
+    color[1] = green/255;
+    color[2] = blue/255;
 }
 
-void Tank::takeAmmo(int value)
+void Tank::setCannonColor(GLfloat red, GLfloat green, GLfloat blue)
 {
-    ammo -= value;
-}
-
-QString Tank::ammoText()
-{
-    return QString::number(ammo);
+    cannonColor[0] = red/255;
+    cannonColor[1] = green/255;
+    cannonColor[2] = blue/255;
 }

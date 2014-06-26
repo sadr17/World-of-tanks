@@ -1,5 +1,4 @@
 #include "display.h"
-#include <QPainter>
 
 Display::Display(QWidget *parent) :
     QGLWidget(parent)
@@ -12,10 +11,9 @@ Display::Display(QWidget *parent) :
     mapWidth = 64;
     mapHeight = 36;
 
-    ammoHud = "50";
     ammoProgress = 1.0;
-    drawScore = false;
     gameTimer = 0;
+    gameStatus = false;
 }
 
 void Display::resizeGL(int w, int h)
@@ -40,6 +38,7 @@ void Display::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0,0,-10);
+    if (!gameStatus) drawResults();
     for(int i = map.size() - 1; i >= 0; --i)
     {
         map[i]->print();
@@ -53,27 +52,24 @@ void Display::paintGL()
         missileList[i]->print();
     }
     drawHudBar();
-    if (drawScore) drawScoreboard();
+    drawSmallScoreboard();
     drawTimer();
 }
 
 void Display::drawHudBar()
 {
-    QFont font("DejaVu Sans", 12, QFont::Light, false);
+    QFont font("Arial", 12, QFont::Light, false);
     glPushMatrix();
-        // Ammo status
-        glPushMatrix();
-            qglColor(Qt::white);
-            renderText(-31, -17.7, -4, ammoHud + "/50", font);
-        glPopMatrix();
+        qglColor(Qt::white);
+        renderText(-13.0, -17.7, -8, QString::number(playerID + 1), font);
         // Ammo bar
         GLdouble progress = 18 * ammoProgress;
         glBegin(GL_POLYGON);
         glColor3d(1.0 - ammoProgress, 0 + ammoProgress, 0);
-        glVertex2d(-28, -17.8);
-        glVertex2d(-28, -17.0);
-        glVertex2d(-28 + progress, -17.0);
-        glVertex2d(-28 + progress, -17.8);
+        glVertex2d(-31.5, -17.8);
+        glVertex2d(-31.5, -17.0);
+        glVertex2d(-31.5 + progress, -17.0);
+        glVertex2d(-31.5 + progress, -17.8);
         glEnd();
         // Background
         glBegin(GL_POLYGON);
@@ -86,42 +82,51 @@ void Display::drawHudBar()
     glPopMatrix();
 }
 
-void Display::drawScoreboard()
-{
-    QFont font("Droid Sans", 12, QFont::Light);
-    glPushMatrix();
-        qglColor(Qt::white);
-        renderText(-29, 11.0, -8, "Tablica wyników", font);
-        glPushMatrix();
-            for(int i = 0; i < scoreboard.size(); ++i)
-            {
-                glTranslated(0.0, -2.0, 0.0);
-                renderText(-29, 11.0, -8, "ID: " + scoreboard[i]->toString(), font);
-            }
-        glPopMatrix();
-        glTranslated(0.0, 0.0, 2.0);
-        glBegin(GL_POLYGON);
-        glColor4f(0, 0, 0, 0.8);
-        glVertex2d(-32.0, 12.0);
-        glVertex2d(-20.0, 12.0);
-        glVertex2d(-20.0, -12.0);
-        glVertex2d(-32.0, -12.0);
-        glEnd();
-    glPopMatrix();
-}
-
 void Display::drawTimer()
 {
     int minutes = gameTimer/(60*1000);
     int seconds = (gameTimer/1000)%60;
     QString mins = QString::number(minutes);
     QString sec = QString::number(seconds);
-    qDebug() << mins + ":" + sec;
-    QFont font("DejaVu Sans", 12, QFont::Light, false);
+    QFont font("Arial", 12, QFont::Light, false);
+    qglColor(Qt::white);
+    renderText(30,-17.7, -4, mins + ":" + sec, font);
+}
+
+void Display::drawSmallScoreboard()
+{
+    QFont font("Arial", 12, QFont::Light);
     glPushMatrix();
-        qglColor(Qt::white);
-        renderText(30,-17.7, -4, mins + ":" + sec, font);
+    for(int i = 0; i < scoreboard.size(); ++i)
+    {
+        i == playerID ? qglColor(Qt::green) : qglColor(Qt::white);
+        renderText(-10.0, -17.7, -4, scoreboard[i]->toString(), font);
+        glTranslatef(3.0, 0.0, 0.0);
+    }
     glPopMatrix();
+}
+
+void Display::drawResults()
+{
+    QFont font("Arial", 20, QFont::Light, false);
+    int winner = 0;
+    for(int i = 1; i < playerList.size(); ++i)
+    {
+        if(scoreboard[i]->getKills() > scoreboard[winner]->getKills())
+        {
+            winner = i;
+
+        }
+    }
+    qglColor(Qt::white);
+    renderText(-4.0, 15.0, -4, "Wygrał gracz: " + QString::number(winner + 1), font);
+    glBegin(GL_POLYGON);
+    glColor4f(0.0, 0.0, 0.0, 0.7);
+    glVertex2f(-30.0, 17.0);
+    glVertex2f(30.0, 17.0);
+    glVertex2f(30.0, 14.0);
+    glVertex2f(-30.0, 14.0);
+    glEnd();
 }
 
 Display::~Display()

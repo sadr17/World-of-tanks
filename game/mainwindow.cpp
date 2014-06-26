@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qsp.setHeightForWidth(true);
     this->setSizePolicy(qsp);
     setCentralWidget(ui->widget);
-    this->setFixedSize(1280,800);
+    this->setFixedSize(1152,720);
 
     playerID = 0;
     socket = new QTcpSocket(this);
@@ -45,7 +45,6 @@ void MainWindow::infoReceived()
     {
         message = in.readLine();
         if(message.isEmpty()) break;
-        qDebug() << "Dostalem wiadomosc: " + message;
         updateGame(message);
     }
     while (!message.isNull());
@@ -77,9 +76,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Space:
             keySpace = true;
             break;
-        case Qt::Key_Tab:
-            ui->widget->drawScore = true;
-            break;
     }
     QMainWindow::keyPressEvent(event);
 }
@@ -108,9 +104,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
             break;
         case Qt::Key_Space:
             keySpace = false;
-            break;
-        case Qt::Key_Tab:
-            ui->widget->drawScore = false;
             break;
     }
     QMainWindow::keyReleaseEvent(event);
@@ -150,7 +143,10 @@ void MainWindow::updateGame(QString &data)
         GLfloat yPosInfo = (GLfloat)info[3].toDouble();
         GLfloat rotInfo = (GLfloat)info[4].toDouble();
         playerID = idInfo;
+        ui->widget->playerID = idInfo;
         ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
+        ui->widget->playerList[playerID]->setColor(82, 122, 22);
+        ui->widget->playerList[playerID]->setCannonColor(43, 69, 5);
         ui->widget->scoreboard.append(new Score(playerID));
     }
     else if(info[0] == "NewMissile:")
@@ -159,7 +155,6 @@ void MainWindow::updateGame(QString &data)
         GLfloat yPosInfo = (GLfloat)info[2].toDouble();
         GLfloat angleInfo = (GLfloat)info[3].toDouble();
         ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo,angleInfo));
-        qDebug() << "Stworzylem nowy pocisk";
     }
     else if(info[0] == "DeleteMissile:")
     {
@@ -174,6 +169,7 @@ void MainWindow::updateGame(QString &data)
         if(playerID > idInfo)
         {
             playerID--;
+            ui->widget->playerID--;
             ui->widget->playerList[playerID]->id--;
             ui->widget->scoreboard[playerID]->tankID--;
         }
@@ -209,6 +205,24 @@ void MainWindow::updateGame(QString &data)
         int timeInfo = info[1].toInt();
         ui->widget->gameTimer = timeInfo;
         roundTimerEnabled = true;
+        if(timeInfo > 0)
+        {
+            ui->widget->gameStatus = true;
+        }
+    }
+    else if(info[0] == "StartRound")
+    {
+        for(int i = 0; i < ui->widget->scoreboard.size(); ++i)
+        {
+            ui->widget->scoreboard[i]->reset();
+        }
+        ui->widget->gameStatus = true;
+    }
+    else if(info[0] == "RoundFinished")
+    {
+        roundTimer = 0;
+        roundTimerEnabled = false;
+        ui->widget->gameStatus = false;
     }
     else
     {
@@ -267,14 +281,12 @@ void MainWindow::movePlayer()
     }
     if(keySpace)
     {
-        if(ui->widget->playerList[playerID]->hasAmmo() && ui->widget->playerList[playerID]->canShoot())
+        if(ui->widget->playerList[playerID]->canShoot())
         {
             missileMessage = "NewMissile: " + QString::number(playerID) + " " +
                              QString::number(ui->widget->playerList[playerID]->getXPos()) + " " +
                              QString::number(ui->widget->playerList[playerID]->getYPos()) + " " +
                              QString::number(ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation());
-            ui->widget->playerList[playerID]->takeAmmo(1);
-            ui->widget->ammoHud = ui->widget->playerList[playerID]->ammoText();
             ui->widget->ammoProgress = 0;
             ui->widget->playerList[playerID]->canShoot(false);
             mtON = true;
@@ -310,7 +322,6 @@ void MainWindow::connectBox()
     {
         QStringList data = connectionData.split(":", QString::SkipEmptyParts);
         socket->connectToHost(data[0], data[1].toInt());
-
     }
     else
     {
@@ -330,6 +341,7 @@ void MainWindow::onTimer()
         }
     }
     movePlayer();
+
     if(mtON)
     {
         if(mt >= 2000)

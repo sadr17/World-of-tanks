@@ -24,3 +24,9 @@ int Score::getKills()
 {
     return kills;
 }
+
+void Score::reset()
+{
+    kills = 0;
+    deaths = 0;
+}

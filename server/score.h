@@ -9,6 +9,7 @@ public:
     void addDeath();
     int getKills();
     int getDeaths();
+    void reset();
 private:
     int kills;
     int deaths;

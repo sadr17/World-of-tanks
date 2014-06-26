@@ -17,21 +17,19 @@ public:
     void rotate(GLfloat value);
     void rotateCannon(GLfloat value);
     void setPos(GLfloat x, GLfloat y);
+    void setColor(GLfloat red, GLfloat green, GLfloat blue);
+    void setCannonColor(GLfloat red, GLfloat green, GLfloat blue);
     GLfloat getRotation();
     GLfloat getCannonRotation();
     void move(GLfloat speed);
     GLfloat getXPos();
     GLfloat getYPos();
-    bool hasAmmo();
-    QString ammoText();
     bool canShoot();
     void canShoot(bool value);
-    void takeAmmo(int value);
     bool canMove(GLfloat speed, QList<Tank *> *tanksList, QList<Obstacle *> *map, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
     int id;
 private:
     GLfloat xPos, yPos;
-    int ammo;
     bool ableToShoot;
     GLfloat color[4], cannonColor[4];
     GLfloat rotation, cannonRotation;
