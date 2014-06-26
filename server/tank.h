@@ -16,7 +16,6 @@ public:
     int id;
 private:
     double xPos, yPos;
-    double color[4];
     double rotation, cannonRotation;
 };
 

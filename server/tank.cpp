@@ -5,10 +5,6 @@ Tank::Tank()
     id = 0;
     xPos = 0;
     yPos = 0;
-    color[0] = 1;
-    color[1] = 0;
-    color[2] = 0;
-    color[3] = 1;
     rotation = 0;
     cannonRotation = 0;
 }
@@ -18,10 +14,6 @@ Tank::Tank(int i, double x, double y, double rot)
     id = i;
     xPos = x;
     yPos = y;
-    color[0] = 1;
-    color[1] = 0;
-    color[2] = 0;
-    color[3] = 1;
     rotation = rot;
     cannonRotation = 0;
 }
