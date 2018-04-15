@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setFixedSize(1152,720);
 
     playerID = 0;
-    //    connectBox();
+//    connectBox();
 
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = keySpace = false;
 

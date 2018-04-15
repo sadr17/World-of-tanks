@@ -11,8 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = game
 TEMPLATE = app
 
-REPC_SOURCE = $$PWD/board.rep
-REPC_REPLICA = $$PWD/board.rep
+REPC_SOURCE = $$PWD/player.rep
+REPC_REPLICA = $$PWD/player.rep
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -20,13 +20,15 @@ SOURCES += main.cpp\
         tank.cpp \
         missile.cpp \
         score.cpp \
-        obstacle.cpp
+        obstacle.cpp \
+    game.cpp
 
 HEADERS  += mainwindow.h \
         display.h \
         tank.h \
         missile.h \
         score.h \
-        obstacle.h
+        obstacle.h \
+    game.h
 
 FORMS    += mainwindow.ui

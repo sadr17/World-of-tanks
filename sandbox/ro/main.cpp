@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    QRemoteObjectHost src(QUrl("local:test"));
+    QRemoteObjectHost src(QUrl("tcp://10.240.23.53:8000/test"));
 
     SimpleSwitch srcSwitch; // create simple switch
     src.enableRemoting(&srcSwitch);
