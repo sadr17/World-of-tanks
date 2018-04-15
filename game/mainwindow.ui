@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>World of Tanks 1.0</string>
   </property>
   <widget class="Display" name="centralWidget">
    <property name="minimumSize">

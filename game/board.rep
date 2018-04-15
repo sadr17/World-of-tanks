@@ -1,0 +1,4 @@
+class Board
+{
+    SLOT(UpdateStatus(const QString &message));
+};

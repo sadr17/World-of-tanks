@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = server
-TEMPLATE = app
+TEMPLATE = console
 
 
 SOURCES += main.cpp\
@@ -24,5 +24,3 @@ HEADERS  += mainwindow.h \
     missile.h \
     score.h \
     obstacle.h
-
-FORMS    += mainwindow.ui

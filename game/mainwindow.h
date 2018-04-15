@@ -10,6 +10,8 @@
 #include <QDesktopWidget>
 #include <QSizePolicy>
 
+#include "obstacle.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -28,9 +30,12 @@ public:
 signals:
 
 private slots:
-    void infoReceived();
     void onTimer();
 
+    void setupMap();
+    void setupPlayers();
+    void setDefaultPos();
+    void fire();
 private:
     Ui::MainWindow *ui;
     QTimer timer;
@@ -43,8 +48,11 @@ private:
     void updateGame(QString &data);
     int playerID;
     int timerInterval;
-    QTcpSocket *socket;
+    double defaultPosTab[4][3];
     bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE, keySpace;
+
+    //From server code
+    QList<Obstacle *> map;
 };
 
 #endif // MAINWINDOW_H
