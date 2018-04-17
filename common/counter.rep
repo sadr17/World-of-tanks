@@ -1,0 +1,3 @@
+class Counter {
+PROP(int counter);
+};
