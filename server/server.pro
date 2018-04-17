@@ -4,23 +4,20 @@
 #
 #-------------------------------------------------
 
-QT       += core network
+QT       += core gui network remoteobjects
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = server
-TEMPLATE = console
+TEMPLATE = app
 
+REPC_SOURCE = ../common/counter.rep
+
+include(../common/common.pri)
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    tank.cpp \
-    missile.cpp \
-    score.cpp \
-    obstacle.cpp
 
 HEADERS  += mainwindow.h \
-    tank.h \
-    missile.h \
-    score.h \
-    obstacle.h
+
+FORMS += mainwindow.ui

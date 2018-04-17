@@ -29,16 +29,18 @@ public:
     virtual int heightForWidth(int w) const {return w * 9/16;};
 
 public slots:
-    void updateReplica(float x, float y, float an, float cAn);
+    void updateReplica(int id, float x, float y, float an, float cAn);
+    void fireReplica(int id, float x, float y, float an);
+    void killedReplica(int id);
 signals:
 
 private slots:
     void onTimer();
-
     void setupMap();
-    void setupPlayers();
+    void initPlayer();
     void setDefaultPos();
     void fire();
+
 private:
     Ui::MainWindow *ui;
     QTimer timer;
@@ -57,6 +59,7 @@ private:
 
     //From server code
     QList<Obstacle *> map;
+    void initTimer();
 };
 
 #endif // MAINWINDOW_H

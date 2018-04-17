@@ -14,9 +14,6 @@
  * 1. User starts the game
  * - create Player source and publish
  * - get list of players from the registration service
- *
- * 2. On new player
- * - connect to the new player, get replica
  */
 class Game : public QObject
 {
@@ -24,31 +21,38 @@ class Game : public QObject
 public:
     explicit Game(QObject *parent = nullptr);
 
-    void registerSelf();
-    void addPlayer(QString &address);
+    void registerSelf(QString registryAddress);
     void update(Tank *tank);
     void fire(Missile * missile);
+    void meKilled(Tank * tank);
+    int currentPlayerId() {
+        return this->playerId;
+    }
 
 signals:
     void updatePosition(float xPos, float yPos, float rotation, float cannonRotation);
     void fire(float xPos, float yPos, float angle);
     void killed();
 
-    void updateReplica(float xPos, float yPos, float rotation, float cannonRotation);
-    void fireReplica(float xPos, float yPos, float angle);
-    void killedReplica();
+    void updateReplica(int id, float xPos, float yPos, float rotation, float cannonRotation);
+    void fireReplica(int id, float xPos, float yPos, float angle);
+    void killedReplica(int id);
+
+    void registered();
 
 public slots:
 
 private:
+    int playerId;
     // source
-    PlayerSource *self;
-    QRemoteObjectHost *src;
+    PlayerSimpleSource *self;
+    QRemoteObjectHost * src;
 
     //replicas
     QRemoteObjectNode *repNode;
-    QSharedPointer<PlayerReplica> ptr;
+    QList<QSharedPointer<PlayerReplica>> replicas;
 
+    void addReplica(QString loc);
 };
 
 #endif // GAME_H

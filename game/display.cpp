@@ -43,9 +43,10 @@ void Display::paintGL()
     {
         map[i]->print();
     }
-    for(int i = playerList.size() - 1; i >= 0; --i)
+    for(int i = playerList.keys().size() - 1; i >= 0; --i)
     {
-        playerList[i]->print();
+        int key = playerList.keys()[i];
+        playerList[key]->print();
     }
     for(int i = missileList.size() - 1; i >= 0; --i)
     {
@@ -99,8 +100,9 @@ void Display::drawSmallScoreboard()
     glPushMatrix();
     for(int i = 0; i < scoreboard.size(); ++i)
     {
-        i == playerID ? qglColor(Qt::green) : qglColor(Qt::white);
-        renderText(-10.0, -17.7, -4, scoreboard[i]->toString(), font);
+        int id = scoreboard.keys()[i];
+        id == playerID ? qglColor(Qt::green) : qglColor(Qt::white);
+        renderText(-10.0, -17.7, -4, scoreboard[id]->toString(), font);
         glTranslatef(3.0, 0.0, 0.0);
     }
     glPopMatrix();
@@ -112,14 +114,14 @@ void Display::drawResults()
     int winner = 0;
     for(int i = 1; i < playerList.size(); ++i)
     {
-        if(scoreboard[i]->getKills() > scoreboard[winner]->getKills())
+        int id = scoreboard.keys()[i];
+        if(scoreboard[id]->getKills() > scoreboard[winner]->getKills())
         {
-            winner = i;
-
+            winner = id;
         }
     }
     qglColor(Qt::white);
-    renderText(-4.0, 15.0, -4, "Wygrał gracz: " + QString::number(winner + 1), font);
+    renderText(-4.0, 15.0, -4, "Scoreboard: " + QString::number(winner + 1), font);
     glBegin(GL_POLYGON);
     glColor4f(0.0, 0.0, 0.0, 0.7);
     glVertex2f(-30.0, 17.0);
@@ -131,12 +133,8 @@ void Display::drawResults()
 
 Display::~Display()
 {
-    while(!playerList.isEmpty())
-        delete playerList.takeFirst();
-    while(!missileList.isEmpty())
-        delete missileList.takeFirst();
-    while(!scoreboard.isEmpty())
-        delete scoreboard.takeFirst();
-    while(!map.isEmpty())
-        delete map.takeFirst();
+    qDeleteAll(this->playerList);
+    qDeleteAll(this->missileList);
+    qDeleteAll(this->scoreboard);
+    qDeleteAll(this->map);
 }

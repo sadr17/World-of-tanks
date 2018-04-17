@@ -8,7 +8,7 @@ class Missile
 {
 public:
     Missile();
-    Missile(GLfloat x = 0, GLfloat y = 0, GLfloat direction = 0);
+    Missile(int id, GLfloat x = 0, GLfloat y = 0, GLfloat direction = 0);
     GLfloat getXPos();
     GLfloat getYPos();
     GLfloat getAngle();
@@ -17,11 +17,15 @@ public:
     void setAngle(GLfloat value);
     void print();
     void move();
+    int hit(QList<Tank *> tanksList);
+    bool canMove(double top, double right, double bottom, double left, QList<Obstacle *> map);
+    int tankID;
 private:
     GLfloat xPos, yPos;
     GLfloat color[4];
     GLfloat angle;
     GLfloat speed;
+
 };
 
 #endif // MISSILE_H

@@ -12,9 +12,9 @@ class Display : public QGLWidget
     Q_OBJECT
 public:
     explicit Display(QWidget *parent = 0);
-    QList<Tank *> playerList;
+    QMap<int, Tank *> playerList;
     QList<Missile *> missileList;
-    QList<Score *> scoreboard;
+    QMap<int, Score *> scoreboard;
     QList<Obstacle *> map;
     ~Display();
     GLint mapWidth;

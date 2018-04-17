@@ -25,7 +25,7 @@ public:
     GLfloat getYPos();
     bool canShoot();
     void canShoot(bool value);
-    bool canMove(GLfloat speed, QList<Tank *> *tanksList, QList<Obstacle *> *map, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
+    bool canMove(GLfloat speed, QList<Tank *> tanksList, QList<Obstacle *> *map, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset = 0);
     int id;
 private:
     GLfloat xPos, yPos;

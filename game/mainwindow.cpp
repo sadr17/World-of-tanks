@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "../common/utils.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,28 +13,15 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(ui->widget);
     this->setFixedSize(1152,720);
 
-
+    keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = keySpace = false;
     playerID = 0;
 
-
-    keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = keySpace = false;
-
-    timerInterval = 15;
-
-    timer.setSingleShot(false);
-    timer.setInterval(timerInterval);
-    connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
-    timer.start();
-    mt = 0;
-    mtON = false;
-    roundTimerEnabled = false;
     connectBox();
 }
 
 MainWindow::~MainWindow()
 {
-    while(!ui->widget->playerList.isEmpty())
-        delete ui->widget->playerList.takeFirst();
+    qDeleteAll(ui->widget->playerList);
     delete ui;
 }
 
@@ -48,33 +36,28 @@ void MainWindow::setupMap()
     ui->widget->map.append(this->map);
 }
 
-void MainWindow::setupPlayers()
+void MainWindow::initPlayer()
 {
-//    int newID = ui->widget->playerList.size();
-
-    // Enable game timer on first player join
-//    if(newID == 0) roundTimerEnabled = true;
-
-//    playerID = newID;
     ui->widget->playerID = playerID;
-    ui->widget->playerList.append(new Tank(playerID, defaultPosTab[playerID][0], defaultPosTab[playerID][1], defaultPosTab[playerID][2]));
-    ui->widget->playerList[0]->setColor(82, 122, 22);
-    ui->widget->playerList[0]->setCannonColor(43, 69, 5);
-    ui->widget->scoreboard.append(new Score(playerID));
+    ui->widget->playerList[playerID] = new Tank(playerID, defaultPosTab[playerID][0], defaultPosTab[playerID][1], defaultPosTab[playerID][2]);
+    ui->widget->playerList[playerID]->setColor(82, 122, 22);
+    ui->widget->playerList[playerID]->setCannonColor(43, 69, 5);
+    ui->widget->scoreboard[playerID] = new Score(playerID);
 
     ui->widget->gameStatus = true;
+}
 
+void MainWindow::initTimer()
+{
+    timerInterval = 15;
 
-//    int idInfo = info[1].toInt();
-//    GLfloat xPosInfo = (GLfloat)info[2].toDouble();
-//    GLfloat yPosInfo = (GLfloat)info[3].toDouble();
-//    GLfloat rotInfo = (GLfloat)info[4].toDouble();
-//    GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
-//    int killsInfo = info[6].toInt();
-//    int deathsInfo = info[7].toInt();
-//    ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
-//    ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
-//    ui->widget->scoreboard.append(new Score(idInfo, killsInfo, deathsInfo));
+    timer.setSingleShot(false);
+    timer.setInterval(timerInterval);
+    connect(&timer,SIGNAL(timeout()),this,SLOT(onTimer()));
+    timer.start();
+    mt = 0;
+    mtON = false;
+    roundTimerEnabled = false;
 }
 
 void MainWindow::setDefaultPos()
@@ -157,126 +140,82 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::updateGame(QString &data)
 {
-    QStringList info = data.split(" ", QString::SkipEmptyParts);
-    if(info[0] == "NewPlayer:")
-    {
-        int idInfo = info[1].toInt();
-        GLfloat xPosInfo = (GLfloat)info[2].toDouble();
-        GLfloat yPosInfo = (GLfloat)info[3].toDouble();
-        GLfloat rotInfo = (GLfloat)info[4].toDouble();
-        GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
-        ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
-        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
-        ui->widget->scoreboard.append(new Score(idInfo));
-    }
-//    else if(info[0] == "SetPlayer:")
+//    QStringList info = data.split(" ", QString::SkipEmptyParts);
+//    else if(info[0] == "ClientDisconnected:")
+//    {
+//        int idInfo = info[1].toInt();
+//        delete ui->widget->playerList.take(idInfo);
+//        delete ui->widget->scoreboard.takeAt(idInfo);
+//        if(playerID > idInfo)
+//        {
+//            playerID--;
+//            ui->widget->playerID--;
+//            ui->widget->playerList[playerID]->id--;
+//            ui->widget->scoreboard[playerID]->tankID--;
+//        }
+//    }
+//    else if(info[0] == "PlayerKilled:")
 //    {
 //        int idInfo = info[1].toInt();
 //        GLfloat xPosInfo = (GLfloat)info[2].toDouble();
 //        GLfloat yPosInfo = (GLfloat)info[3].toDouble();
 //        GLfloat rotInfo = (GLfloat)info[4].toDouble();
 //        GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
-//        int killsInfo = info[6].toInt();
-//        int deathsInfo = info[7].toInt();
-//        ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
+//        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
+//        ui->widget->playerList[idInfo]->setRotation(rotInfo);
 //        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
-//        ui->widget->scoreboard.append(new Score(idInfo, killsInfo, deathsInfo));
 //    }
-//    else if(info[0] == "IDMessage:")
+//    else if(info[0] == "UpdateScoreboard:")
 //    {
 //        int idInfo = info[1].toInt();
-//        GLfloat xPosInfo = (GLfloat)info[2].toDouble();
-//        GLfloat yPosInfo = (GLfloat)info[3].toDouble();
-//        GLfloat rotInfo = (GLfloat)info[4].toDouble();
-//        playerID = idInfo;
-//        ui->widget->playerID = idInfo;
-//        ui->widget->playerList.append(new Tank(idInfo, xPosInfo, yPosInfo, rotInfo));
-//        ui->widget->playerList[playerID]->setColor(82, 122, 22);
-//        ui->widget->playerList[playerID]->setCannonColor(43, 69, 5);
-//        ui->widget->scoreboard.append(new Score(playerID));
+//        int killsInfo = info[2].toInt();
+//        int deathsInfo = info[3].toInt();
+//        ui->widget->scoreboard[idInfo]->setKills(killsInfo);
+//        ui->widget->scoreboard[idInfo]->setDeaths(deathsInfo);
 //    }
-    else if(info[0] == "DeleteMissile:")
-    {
-        int idInfo = info[1].toInt();
-        delete ui->widget->missileList.takeAt(idInfo);
-    }
-    else if(info[0] == "ClientDisconnected:")
-    {
-        int idInfo = info[1].toInt();
-        delete ui->widget->playerList.takeAt(idInfo);
-        delete ui->widget->scoreboard.takeAt(idInfo);
-        if(playerID > idInfo)
-        {
-            playerID--;
-            ui->widget->playerID--;
-            ui->widget->playerList[playerID]->id--;
-            ui->widget->scoreboard[playerID]->tankID--;
-        }
-    }
-    else if(info[0] == "PlayerKilled:")
-    {
-        int idInfo = info[1].toInt();
-        GLfloat xPosInfo = (GLfloat)info[2].toDouble();
-        GLfloat yPosInfo = (GLfloat)info[3].toDouble();
-        GLfloat rotInfo = (GLfloat)info[4].toDouble();
-        GLfloat cannonRotInfo = (GLfloat)info[5].toDouble();
-        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
-        ui->widget->playerList[idInfo]->setRotation(rotInfo);
-        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
-    }
-    else if(info[0] == "UpdateScoreboard:")
-    {
-        int idInfo = info[1].toInt();
-        int killsInfo = info[2].toInt();
-        int deathsInfo = info[3].toInt();
-        ui->widget->scoreboard[idInfo]->setKills(killsInfo);
-        ui->widget->scoreboard[idInfo]->setDeaths(deathsInfo);
-    }
-    else if(info[0] == "Time:")
-    {
-        int timeInfo = info[1].toInt();
-        ui->widget->gameTimer = timeInfo;
-        roundTimerEnabled = true;
-        if(timeInfo > 0)
-        {
-            ui->widget->gameStatus = true;
-        }
-    }
-    else if(info[0] == "StartRound")
-    {
-        for(int i = 0; i < ui->widget->scoreboard.size(); ++i)
-        {
-            ui->widget->scoreboard[i]->reset();
-        }
-        ui->widget->gameStatus = true;
-    }
-    else if(info[0] == "RoundFinished")
-    {
-        roundTimer = 0;
-        roundTimerEnabled = false;
-        ui->widget->gameStatus = false;
-    }
-    else
-    {
-        int idInfo = info[0].toInt();
-        GLfloat xPosInfo = (GLfloat)info[1].toDouble();
-        GLfloat yPosInfo = (GLfloat)info[2].toDouble();
-        GLfloat rotInfo = (GLfloat)info[3].toDouble();
-        GLfloat cannonRotInfo = (GLfloat)info[4].toDouble();
-        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
-        ui->widget->playerList[idInfo]->setRotation(rotInfo);
-        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
-    }
+//    else if(info[0] == "Time:")
+//    {
+//        int timeInfo = info[1].toInt();
+//        ui->widget->gameTimer = timeInfo;
+//        roundTimerEnabled = true;
+//        if(timeInfo > 0)
+//        {
+//            ui->widget->gameStatus = true;
+//        }
+//    }
+//    else if(info[0] == "StartRound")
+//    {
+//        for(int i = 0; i < ui->widget->scoreboard.size(); ++i)
+//        {
+//            ui->widget->scoreboard[i]->reset();
+//        }
+//        ui->widget->gameStatus = true;
+//    }
+//    else if(info[0] == "RoundFinished")
+//    {
+//        roundTimer = 0;
+//        roundTimerEnabled = false;
+//        ui->widget->gameStatus = false;
+//    }
+//    else
+//    {
+//        int idInfo = info[0].toInt();
+//        GLfloat xPosInfo = (GLfloat)info[1].toDouble();
+//        GLfloat yPosInfo = (GLfloat)info[2].toDouble();
+//        GLfloat rotInfo = (GLfloat)info[3].toDouble();
+//        GLfloat cannonRotInfo = (GLfloat)info[4].toDouble();
+//        ui->widget->playerList[idInfo]->setPos(xPosInfo , yPosInfo);
+//        ui->widget->playerList[idInfo]->setRotation(rotInfo);
+//        ui->widget->playerList[idInfo]->setCannonRotation(cannonRotInfo);
+//    }
 }
 
 void MainWindow::fire()
 {
-    //TO-DO: add hit() method to missle
-    int tankID = playerID;
     GLfloat xPosInfo = ui->widget->playerList[playerID]->getXPos();
     GLfloat yPosInfo = ui->widget->playerList[playerID]->getYPos();
     GLfloat angleInfo = ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation();
-    Missile * missile = new Missile(xPosInfo,yPosInfo,angleInfo);
+    Missile * missile = new Missile(playerID, xPosInfo,yPosInfo,angleInfo);
     ui->widget->missileList.append(missile);
     this->game->fire(missile);
 }
@@ -290,7 +229,7 @@ void MainWindow::movePlayer()
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(0.10, &ui->widget->playerList, &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(0.10, ui->widget->playerList.values(), &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(0.10);
         moving = true;
     }
@@ -298,7 +237,7 @@ void MainWindow::movePlayer()
     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(-0.05, &ui->widget->playerList, &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(-0.05, ui->widget->playerList.values(), &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(-0.05);
         moving = true;
     }
@@ -339,7 +278,6 @@ void MainWindow::movePlayer()
     this->game->update(ui->widget->playerList[playerID]);
 }
 
-//TO-DO: Change connection to node
 void MainWindow::connectBox()
 {
     bool ok;
@@ -347,46 +285,54 @@ void MainWindow::connectBox()
                                                    tr("Enter node address"),
                                                    tr("Enter address of node"),
                                                    QLineEdit::Normal,
-                                                   QString("127.0.0.1"), &ok);
+                                                   Utils::getCurrentIpAddress(), &ok);
     this->game = new Game(this);
     if (ok && !connectionData.isEmpty())
     {
-        qDebug()<<"Replica";
-        this->playerID = 1;
-        this->game->registerSelf();
+        this->game->registerSelf(connectionData);
+        connect(this->game, &Game::registered, [this](){
+            this->playerID = this->game->currentPlayerId();
+            this->setupMap();
+            this->setDefaultPos();
+            this->initPlayer();
+            this->initTimer();
 
-        this->setupMap();
-        this->setDefaultPos();
-        this->setupPlayers();
-
-        this->game->addPlayer(connectionData);
-        connect(this->game, SIGNAL(updateReplica(float,float,float,float)), this, SLOT(updateReplica(float, float, float, float)));
-    }
+            connect(this->game, SIGNAL(updateReplica(int, float,float,float,float)), this, SLOT(updateReplica(int, float, float, float, float)));
+            connect(this->game, SIGNAL(fireReplica(int,float,float,float)), SLOT(fireReplica(int, float, float, float)));
+            connect(this->game, SIGNAL(killedReplica(int)), SLOT(killedReplica(int)));
+        });
+     }
     else
     {
-        qDebug()<<"Source";
-        this->playerID = 0;
-        this->game->registerSelf();
-
-        this->setupMap();
-        this->setDefaultPos();
-        this->setupPlayers();
+        exit(0);
     }
 }
 
-void MainWindow::updateReplica(float x, float y, float an, float cAn)
+void MainWindow::updateReplica(int id, float x, float y, float an, float cAn)
 {
-    qDebug()<<"update replica"<<ui->widget->playerList.length();
-    if (ui->widget->playerList.length() == 1) {
-    ui->widget->playerList.append(new Tank(0, x, y, an));
-    ui->widget->playerList[1]->setCannonRotation(cAn);
-    ui->widget->scoreboard.append(new Score(0));
+    if (!ui->widget->playerList.contains(id))
+    {
+      ui->widget->playerList[id] = new Tank(id, x, y, an);
+      ui->widget->scoreboard[id] = new Score(id);
     }
-    else {
-      ui->widget->playerList[1]->setPos(x, y);
-      ui->widget->playerList[1]->setRotation(an);
-      ui->widget->playerList[1]->setCannonRotation(cAn);
-    }
+
+    ui->widget->playerList[id]->setPos(x, y);
+    ui->widget->playerList[id]->setRotation(an);
+    ui->widget->playerList[id]->setCannonRotation(cAn);
+}
+
+void MainWindow::fireReplica(int id, float x, float y, float an)
+{
+    ui->widget->missileList.append(new Missile(id, x, y, an));
+}
+
+void MainWindow::killedReplica(int id)
+{
+    int death = ui->widget->scoreboard[id]->getDeaths();
+    ui->widget->scoreboard[id]->setDeaths(++death);
+
+    int kills = ui->widget->scoreboard[this->playerID]->getKills();
+    ui->widget->scoreboard[this->playerID]->setKills(++kills);
 }
 
 void MainWindow::onTimer()
@@ -423,7 +369,32 @@ void MainWindow::onTimer()
     {
         for(int i = ui->widget->missileList.size()-1; i >= 0; --i)
         {
-            ui->widget->missileList[i]->move();
+            int tankID = ui->widget->missileList[i]->hit(ui->widget->playerList.values());
+            if (tankID >= 0 && tankID == this->playerID)
+            {
+                int tankHitId = ui->widget->missileList[i]->tankID;
+
+                ui->widget->playerList[tankID]->setRotation(defaultPosTab[tankID][3]);
+                ui->widget->playerList[tankID]->setCannonRotation(0);
+                ui->widget->playerList[tankID]->setPos(defaultPosTab[tankID][0], defaultPosTab[tankID][1]);
+
+                int death = ui->widget->scoreboard[tankID]->getDeaths();
+                ui->widget->scoreboard[tankID]->setDeaths(++death);
+
+                int kills = ui->widget->scoreboard[tankHitId]->getKills();
+                ui->widget->scoreboard[tankHitId]->setKills(++kills);
+
+                this->game->meKilled(ui->widget->playerList[tankID]);
+            }
+            if(ui->widget->missileList[i]->canMove(18, 32, -16.8, -32, map))
+            {
+               ui->widget->missileList[i]->move();
+            }
+            else
+            {
+               delete ui->widget->missileList.takeAt(i);
+            }
+
         }
     }
     ui->widget->updateGL();
