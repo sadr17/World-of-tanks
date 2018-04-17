@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = game
 TEMPLATE = app
 
+
 REPC_SOURCE = $$PWD/player.rep
 REPC_REPLICA = $$PWD/player.rep
 

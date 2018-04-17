@@ -12,8 +12,9 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(ui->widget);
     this->setFixedSize(1152,720);
 
+
     playerID = 0;
-//    connectBox();
+
 
     keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = keySpace = false;
 
@@ -26,10 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mt = 0;
     mtON = false;
     roundTimerEnabled = false;
-
-    this->setupMap();
-    this->setDefaultPos();
-    this->setupPlayers();
+    connectBox();
 }
 
 MainWindow::~MainWindow()
@@ -52,19 +50,20 @@ void MainWindow::setupMap()
 
 void MainWindow::setupPlayers()
 {
-    int newID = ui->widget->playerList.size();
+//    int newID = ui->widget->playerList.size();
 
     // Enable game timer on first player join
-    if(newID == 0) roundTimerEnabled = true;
+//    if(newID == 0) roundTimerEnabled = true;
 
-    playerID = newID;
+//    playerID = newID;
     ui->widget->playerID = playerID;
-    ui->widget->playerList.append(new Tank(newID, defaultPosTab[newID][0], defaultPosTab[newID][1], defaultPosTab[newID][2]));
-    ui->widget->playerList[playerID]->setColor(82, 122, 22);
-    ui->widget->playerList[playerID]->setCannonColor(43, 69, 5);
+    ui->widget->playerList.append(new Tank(playerID, defaultPosTab[playerID][0], defaultPosTab[playerID][1], defaultPosTab[playerID][2]));
+    ui->widget->playerList[0]->setColor(82, 122, 22);
+    ui->widget->playerList[0]->setCannonColor(43, 69, 5);
     ui->widget->scoreboard.append(new Score(playerID));
 
     ui->widget->gameStatus = true;
+
 
 //    int idInfo = info[1].toInt();
 //    GLfloat xPosInfo = (GLfloat)info[2].toDouble();
@@ -277,7 +276,9 @@ void MainWindow::fire()
     GLfloat xPosInfo = ui->widget->playerList[playerID]->getXPos();
     GLfloat yPosInfo = ui->widget->playerList[playerID]->getYPos();
     GLfloat angleInfo = ui->widget->playerList[playerID]->getCannonRotation() + ui->widget->playerList[playerID]->getRotation();
-    ui->widget->missileList.append(new Missile(xPosInfo,yPosInfo,angleInfo));
+    Missile * missile = new Missile(xPosInfo,yPosInfo,angleInfo);
+    ui->widget->missileList.append(missile);
+    this->game->fire(missile);
 }
 
 void MainWindow::movePlayer()
@@ -334,20 +335,57 @@ void MainWindow::movePlayer()
     }
 
     if(!moving && !shooting) return;
+
+    this->game->update(ui->widget->playerList[playerID]);
 }
 
 //TO-DO: Change connection to node
 void MainWindow::connectBox()
 {
     bool ok;
-    QString connectionData = QInputDialog::getText(this, tr("Enter node address"), tr("Enter address of node"), QLineEdit::Normal, QDir::home().dirName(), &ok);
+    QString connectionData = QInputDialog::getText(this,
+                                                   tr("Enter node address"),
+                                                   tr("Enter address of node"),
+                                                   QLineEdit::Normal,
+                                                   QString("127.0.0.1"), &ok);
+    this->game = new Game(this);
     if (ok && !connectionData.isEmpty())
     {
-        QStringList data = connectionData.split(":", QString::SkipEmptyParts);
+        qDebug()<<"Replica";
+        this->playerID = 1;
+        this->game->registerSelf();
+
+        this->setupMap();
+        this->setDefaultPos();
+        this->setupPlayers();
+
+        this->game->addPlayer(connectionData);
+        connect(this->game, SIGNAL(updateReplica(float,float,float,float)), this, SLOT(updateReplica(float, float, float, float)));
     }
     else
     {
-        exit(0);
+        qDebug()<<"Source";
+        this->playerID = 0;
+        this->game->registerSelf();
+
+        this->setupMap();
+        this->setDefaultPos();
+        this->setupPlayers();
+    }
+}
+
+void MainWindow::updateReplica(float x, float y, float an, float cAn)
+{
+    qDebug()<<"update replica"<<ui->widget->playerList.length();
+    if (ui->widget->playerList.length() == 1) {
+    ui->widget->playerList.append(new Tank(0, x, y, an));
+    ui->widget->playerList[1]->setCannonRotation(cAn);
+    ui->widget->scoreboard.append(new Score(0));
+    }
+    else {
+      ui->widget->playerList[1]->setPos(x, y);
+      ui->widget->playerList[1]->setRotation(an);
+      ui->widget->playerList[1]->setCannonRotation(cAn);
     }
 }
 

@@ -11,6 +11,7 @@ public:
     Missile(GLfloat x = 0, GLfloat y = 0, GLfloat direction = 0);
     GLfloat getXPos();
     GLfloat getYPos();
+    GLfloat getAngle();
     void setXPos(GLfloat value);
     void setYPos(GLfloat value);
     void setAngle(GLfloat value);

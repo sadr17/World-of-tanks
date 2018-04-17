@@ -11,6 +11,7 @@
 #include <QSizePolicy>
 
 #include "obstacle.h"
+#include "game.h"
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +28,8 @@ public:
     void keyReleaseEvent(QKeyEvent* event);
     virtual int heightForWidth(int w) const {return w * 9/16;};
 
+public slots:
+    void updateReplica(float x, float y, float an, float cAn);
 signals:
 
 private slots:
@@ -39,6 +42,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTimer timer;
+    Game * game;
     int roundTimer;
     bool roundTimerEnabled;
     void connectBox();

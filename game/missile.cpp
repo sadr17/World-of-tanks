@@ -29,6 +29,11 @@ GLfloat Missile::getYPos()
     return yPos;
 }
 
+GLfloat Missile::getAngle()
+{
+    return this->angle;
+}
+
 void Missile::setXPos(GLfloat value)
 {
     xPos = value;
