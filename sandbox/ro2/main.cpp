@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     QRemoteObjectNode repNode; // create remote object node
-    repNode.connectToNode(QUrl("local:test")); // connect with remote host node
+    repNode.setRegistryUrl(QUrl("tcp://127.0.0.1:8000/test"));//.connectToNode(QUrl("local:test")); // connect with remote host node
 
     QSharedPointer<SimpleSwitchReplica> ptr;
     ptr.reset(repNode.acquire<SimpleSwitchReplica>()); // acquire replica of source from host node
