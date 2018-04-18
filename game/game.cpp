@@ -55,8 +55,9 @@ void Game::addReplica(QString loc)
         return;
 
     int id = loc.split("_").last().toInt();
-    if(id == this->playerId)
+    if(id == this->playerId) {
         return;
+    }
 
     auto replica = this->src->acquire<PlayerReplica>(loc);
     if (replica) {
@@ -69,6 +70,10 @@ void Game::addReplica(QString loc)
         connect(replica, &PlayerReplica::killed, [this, id]() {
                emit killedReplica(id);
         });
+        connect(replica, &PlayerReplica::initialized, [this](){
+               emit replicaAdded();
+        });
+
     }
 }
 

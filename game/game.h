@@ -40,6 +40,9 @@ signals:
 
     void registered();
 
+    void replicaAdded();
+    void replicaRemoved();
+
 public slots:
 
 private:

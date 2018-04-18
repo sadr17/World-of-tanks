@@ -273,9 +273,9 @@ void MainWindow::movePlayer()
         }
     }
 
-    if(!moving && !shooting) return;
-
     this->game->update(ui->widget->playerList[playerID]);
+
+    if(!moving && !shooting) return;
 }
 
 void MainWindow::connectBox()
@@ -292,14 +292,21 @@ void MainWindow::connectBox()
         this->game->registerSelf(connectionData);
         connect(this->game, &Game::registered, [this](){
             this->playerID = this->game->currentPlayerId();
+
             this->setupMap();
             this->setDefaultPos();
             this->initPlayer();
             this->initTimer();
 
+            this->game->update(ui->widget->playerList[playerID]);
+
             connect(this->game, SIGNAL(updateReplica(int, float,float,float,float)), this, SLOT(updateReplica(int, float, float, float, float)));
             connect(this->game, SIGNAL(fireReplica(int,float,float,float)), SLOT(fireReplica(int, float, float, float)));
             connect(this->game, SIGNAL(killedReplica(int)), SLOT(killedReplica(int)));
+            connect(this->game, &Game::replicaAdded, [this]()
+            {
+                this->game->update(ui->widget->playerList[playerID]);
+            });
         });
      }
     else
