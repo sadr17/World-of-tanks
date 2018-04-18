@@ -4,12 +4,12 @@
 #include <math.h>
 #include <obstacle.h>
 
-class Tank
+class Tank : public QObject
 {
+    Q_OBJECT
 public:
-    Tank();
-    Tank(int i);
-    Tank(int i, GLfloat x, GLfloat y, GLfloat rot);
+    explicit Tank(int id, QObject * parent = nullptr);
+    Tank(int id, GLfloat x, GLfloat y, GLfloat rot, QObject * parent = nullptr);
     void print();
     void setRotation(GLfloat value);
     void setCannonRotation(GLfloat value);

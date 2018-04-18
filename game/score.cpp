@@ -1,18 +1,15 @@
 #include "score.h"
 
-Score::Score()
-{
-    kills = tankID = deaths = 0;
-}
-
-Score::Score(int i)
+Score::Score(int i, QObject * parent) :
+    QObject(parent)
 {
     tankID = i;
     kills = 0;
     deaths = 0;
 }
 
-Score::Score(int i, int k, int d)
+Score::Score(int i, int k, int d, QObject * parent) :
+    QObject(parent)
 {
     tankID = i;
     kills = k;

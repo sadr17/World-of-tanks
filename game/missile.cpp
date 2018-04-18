@@ -1,15 +1,7 @@
 #include "missile.h"
 
-Missile::Missile()
-{
-    xPos = yPos = 0;
-    color[0] = color[1] = color[2] = 0;
-    color[3] = 1;
-    angle = 0;
-    speed = 0.7;
-}
-
-Missile::Missile(int id, GLfloat x, GLfloat y, GLfloat direction)
+Missile::Missile(int id, GLfloat x, GLfloat y, GLfloat direction, QObject * parent) :
+    QObject(parent)
 {
     tankID = id;
     xPos = x;

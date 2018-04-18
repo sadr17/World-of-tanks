@@ -22,7 +22,7 @@ void Game::registerSelf(QString registryAddress)
                                            .arg(registryAddress)
                                            .arg(QString("8080/registry"))), this);
     if(!this->src->waitForRegistry()) {
-        qDebug()<<"Failed to connect to registry";
+        qDebug()<<"Failed to connect to registry node";
         return;
     }
 
@@ -39,14 +39,15 @@ void Game::registerSelf(QString registryAddress)
     connect(counter, &CounterReplica::initialized, [this, counter](){
         this->playerId = counter->counter();
         this->self = new PlayerSimpleSource(this);
-        this->src->enableRemoting(this->self, QString("Player_%1").arg(this->playerId));
+
+        if (!this->src->enableRemoting(this->self, QString("Player_%1").arg(this->playerId)))
+            return;
 
         connect(this, SIGNAL(updatePosition(float,float,float,float)), this->self, SIGNAL(update(float,float,float,float)));
         connect(this, SIGNAL(fire(float,float,float)), this->self, SIGNAL(fire(float,float,float)));
-        connect(this, SIGNAL(killed()), this->self, SIGNAL(killed()));
+        connect(this, SIGNAL(killed(int)), this->self, SIGNAL(killed(int)));
         emit registered();
     });
-
 }
 
 void Game::addReplica(QString loc)
@@ -67,13 +68,17 @@ void Game::addReplica(QString loc)
         connect(replica, &PlayerReplica::fire, [this, id](float x,float y,float a) {
                emit fireReplica(id, x, y, a);
         });
-        connect(replica, &PlayerReplica::killed, [this, id]() {
-               emit killedReplica(id);
+        connect(replica, &PlayerReplica::killed, [this, id](int hitId) {
+               emit killedReplica(id, hitId);
         });
         connect(replica, &PlayerReplica::initialized, [this](){
                emit replicaAdded();
         });
-
+        connect(replica, &PlayerReplica::stateChanged, [this, id](QRemoteObjectReplica::State state, QRemoteObjectReplica::State oldState){
+            if (state == QRemoteObjectReplica::Suspect) {
+                emit replicaRemoved(id);
+            }
+        });
     }
 }
 
@@ -87,8 +92,8 @@ void Game::fire(Missile *missile)
     emit fire(missile->getXPos(), missile->getYPos(), missile->getAngle());
 }
 
-void Game::meKilled(Tank * tank)
+void Game::meKilled(int hitId, Tank * tank)
 {
-    emit killed();
+    emit killed(hitId);
     this->update(tank);
 }

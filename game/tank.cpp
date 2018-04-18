@@ -1,27 +1,11 @@
 #include "tank.h"
 
-Tank::Tank()
-{
-    id = 0;
-    color[0] = 1;
-    color[1] = 0;
-    color[2] = 0;
-    color[3] = 1;
-    cannonColor[0] = 0;
-    cannonColor[1] = 0;
-    cannonColor[2] = 0;
-    cannonColor[3] = 1;
-    rotation = 0;
-    xPos = 0;
-    yPos = 0;
-    cannonRotation = 0;
-    ableToShoot = true;
-}
 
-Tank::Tank(int i)
+Tank::Tank(int id, QObject * parent) :
+    QObject(parent)
 {
     ableToShoot = true;
-    id = i;
+    this->id = id;
     color[0] = 1;
     color[1] = 0;
     color[2] = 0;
@@ -36,7 +20,8 @@ Tank::Tank(int i)
     yPos = 0;
 }
 
-Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot)
+Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot, QObject * parent) :
+    QObject(parent)
 {
     ableToShoot = true;
     id = i;

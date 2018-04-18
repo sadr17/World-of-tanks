@@ -2,13 +2,14 @@
 #define SCORE_H
 
 #include <QString>
+#include <QObject>
 
-class Score
+class Score : public QObject
 {
+    Q_OBJECT
 public:
-    Score();
-    Score(int i);
-    Score(int i, int k, int d);
+    explicit Score(int i, QObject * parent);
+    Score(int i, int k, int d, QObject * parent);
     void setDeaths(int value);
     void setKills(int value);
     void reset();

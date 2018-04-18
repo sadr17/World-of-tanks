@@ -4,11 +4,11 @@
 #include <math.h>
 #include "tank.h"
 
-class Missile
+class Missile : public QObject
 {
+    Q_OBJECT
 public:
-    Missile();
-    Missile(int id, GLfloat x = 0, GLfloat y = 0, GLfloat direction = 0);
+    explicit Missile(int id, GLfloat x = 0, GLfloat y = 0, GLfloat direction = 0, QObject * parent = nullptr);
     GLfloat getXPos();
     GLfloat getYPos();
     GLfloat getAngle();

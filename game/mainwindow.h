@@ -28,10 +28,12 @@ public:
     void keyReleaseEvent(QKeyEvent* event);
     virtual int heightForWidth(int w) const {return w * 9/16;};
 
+    void handleAmmoProgress();
+
 public slots:
     void updateReplica(int id, float x, float y, float an, float cAn);
     void fireReplica(int id, float x, float y, float an);
-    void killedReplica(int id);
+    void killedReplica(int id, int hitId);
 signals:
 
 private slots:
@@ -42,24 +44,26 @@ private slots:
     void fire();
 
 private:
+    void movePlayer();
+    void connectBox();
+    void initTimer();
+    void handleMissiles();
+
     Ui::MainWindow *ui;
     QTimer timer;
     Game * game;
     int roundTimer;
-    bool roundTimerEnabled;
-    void connectBox();
+
     int mt;
     bool mtON;
-    void movePlayer();
-    void updateGame(QString &data);
+
     int playerID;
     int timerInterval;
     double defaultPosTab[4][3];
     bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE, keySpace;
 
-    //From server code
     QList<Obstacle *> map;
-    void initTimer();
+
 };
 
 #endif // MAINWINDOW_H
