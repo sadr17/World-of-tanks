@@ -8,7 +8,7 @@ Tank::Tank(int id, QObject * parent) :
     this->id = id;
     color[0] = 1;
     color[1] = 0;
-    color[2] = 0;
+    color[2] = id;
     color[3] = 1;
     cannonColor[0] = 0;
     cannonColor[1] = 0;
@@ -26,8 +26,8 @@ Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot, QObject * parent) :
     ableToShoot = true;
     id = i;
     color[0] = 1;
-    color[1] = 0;
-    color[2] = 0;
+    color[1] = id % 4;
+    color[2] = id % 3;
     color[3] = 1;
     cannonColor[0] = 0;
     cannonColor[1] = 0;
