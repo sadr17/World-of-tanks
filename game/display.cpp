@@ -3,10 +3,10 @@
 Display::Display(QWidget *parent) :
     QGLWidget(parent)
 {
-    bColor[0] = 0.7;
+    bColor[0] = 0.2;
     bColor[1] = 0.7;
-    bColor[2] = 0.7;
-    bColor[3] = 1;
+    bColor[2] = 0.3;
+    bColor[3] = 0.1;
 
     mapWidth = 64;
     mapHeight = 36;
@@ -31,6 +31,9 @@ void Display::initializeGL()
     glClearColor(bColor[0], bColor[1], bColor[2], bColor[3]);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_MULTISAMPLE);
 }
 
 void Display::paintGL()

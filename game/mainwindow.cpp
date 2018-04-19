@@ -26,11 +26,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupMap()
 {
-    map.append(new Obstacle(-15, -6, 5));
-    map.append(new Obstacle(-10, -2, 2));
-    map.append(new Obstacle(11, 3, 2.8));
-    map.append(new Obstacle(15, 0, 3));
-    map.append(new Obstacle(-4, 0.9, 3.9));
+    map.append(new Obstacle(-18, -8, 5));
+    map.append(new Obstacle(-8, -2, 2));
+    map.append(new Obstacle(14, -5, 4.8));
+    map.append(new Obstacle(11, 13, 3));
+    map.append(new Obstacle(-9, 9.9, 3.9));
 
     ui->widget->map.append(this->map);
 }
