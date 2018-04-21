@@ -1,31 +1,24 @@
 #ifndef MISSILE_H
 #define MISSILE_H
-#include <QGLWidget>
-#include <math.h>
+#include "basemapobject.h"
 #include "tank.h"
 
-class Missile : public QObject
+class Missile : public BaseMapObject
 {
     Q_OBJECT
 public:
-    explicit Missile(int id, GLfloat x = 0, GLfloat y = 0, GLfloat direction = 0, QObject * parent = nullptr);
-    GLfloat getXPos();
-    GLfloat getYPos();
-    GLfloat getAngle();
-    void setXPos(GLfloat value);
-    void setYPos(GLfloat value);
-    void setAngle(GLfloat value);
-    void print();
+    Missile(Tank * tank);
+
+    int getTankId();
     void move();
     int hit(QList<Tank *> tanksList);
     bool canMove(double top, double right, double bottom, double left, QList<Obstacle *> map);
-    int tankID;
-private:
-    GLfloat xPos, yPos;
-    GLfloat color[4];
-    GLfloat angle;
-    GLfloat speed;
 
+    void print();
+private:
+    float color[4];
+    float speed;
+    int tankID;
 };
 
 #endif // MISSILE_H

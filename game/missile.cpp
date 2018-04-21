@@ -1,15 +1,19 @@
 #include "missile.h"
+#include <QGLWidget>
+#include <math.h>
 
-Missile::Missile(int id, GLfloat x, GLfloat y, GLfloat direction, QObject * parent) :
-    QObject(parent)
+Missile::Missile(Tank * tank) :
+    BaseMapObject(tank->getXPos(), tank->getYPos(), tank->getAngle() + tank->getCannonRotation(), tank)
 {
-    tankID = id;
-    xPos = x;
-    yPos = y;
+    tankID = tank->getId();
     color[0] = color[1] = color[2] = 0;
     color[3] = 1;
-    angle = direction;
     speed = 0.7;
+}
+
+int Missile::getTankId()
+{
+    return this->tankID;
 }
 
 int Missile::hit(QList<Tank *> tanksList)
@@ -18,7 +22,7 @@ int Missile::hit(QList<Tank *> tanksList)
     double missileRadius = 0.1;
     for(int i = 0; i < tanksList.size(); ++i)
     {
-        int tankId = tanksList.at(i)->id;
+        int tankId = tanksList.at(i)->getId();
         if(tankId != tankID)
         {
             double xVector = xPos - tanksList.at(i)->getXPos();
@@ -37,43 +41,13 @@ bool Missile::canMove(double top, double right, double bottom, double left, QLis
     double yCheck = yPos + cos(angle*M_PI/180)*speed;
     for(int i = 0; i < map.size(); ++i)
     {
-        double xVector = xCheck - map.at(i)->getX();
-        double yVector = yCheck - map.at(i)->getY();
+        double xVector = xCheck - map.at(i)->getXPos();
+        double yVector = yCheck - map.at(i)->getYPos();
         double vector = sqrt(xVector*xVector + yVector*yVector);
-        if(vector <= 0.1 + map.at(i)->getRad())
+        if(vector <= 0.1 + map.at(i)->getAngle())
             return false;
     }
     return xCheck > left && xCheck < right && yCheck > bottom && yCheck < top;
-}
-
-GLfloat Missile::getXPos()
-{
-    return xPos;
-}
-
-GLfloat Missile::getYPos()
-{
-    return yPos;
-}
-
-GLfloat Missile::getAngle()
-{
-    return this->angle;
-}
-
-void Missile::setXPos(GLfloat value)
-{
-    xPos = value;
-}
-
-void Missile::setAngle(GLfloat value)
-{
-    angle = value;
-}
-
-void Missile::setYPos(GLfloat value)
-{
-    yPos = value;
 }
 
 void Missile::move()

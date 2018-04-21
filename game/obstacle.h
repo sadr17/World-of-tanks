@@ -1,21 +1,13 @@
 #ifndef OBSTACLE_H
 #define OBSTACLE_H
+#include <basemapobject.h>
 
-#include <QGLWidget>
-#include "math.h"
-
-class Obstacle
+class Obstacle : public BaseMapObject
 {
+    Q_OBJECT
 public:
-    Obstacle();
-    Obstacle(GLfloat xPos, GLfloat yPos, GLfloat radius);
+    Obstacle(float x, float y, float angle, QObject * parent = nullptr);
     void print();
-    GLfloat getX();
-    GLfloat getY();
-    GLfloat getRad();
-private:
-    GLfloat x, y;
-    GLfloat rad;
 };
 
 #endif // OBSTACLE_H

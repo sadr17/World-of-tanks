@@ -1,30 +1,10 @@
 #include "tank.h"
 
-
-Tank::Tank(int id, QObject * parent) :
-    QObject(parent)
+Tank::Tank(int id, float x, float y, float rot, QObject * parent) :
+    BaseMapObject(x, y, rot, parent)
 {
     ableToShoot = true;
     this->id = id;
-    color[0] = 1;
-    color[1] = 0;
-    color[2] = id;
-    color[3] = 1;
-    cannonColor[0] = 0;
-    cannonColor[1] = 0;
-    cannonColor[2] = 0;
-    cannonColor[3] = 1;
-    rotation = 0;
-    cannonRotation = 0;
-    xPos = 0;
-    yPos = 0;
-}
-
-Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot, QObject * parent) :
-    QObject(parent)
-{
-    ableToShoot = true;
-    id = i;
     color[0] = 1;
     color[1] = id % 4;
     color[2] = id % 3;
@@ -33,10 +13,7 @@ Tank::Tank(int i, GLfloat x, GLfloat y, GLfloat rot, QObject * parent) :
     cannonColor[1] = 0;
     cannonColor[2] = 0;
     cannonColor[3] = 1;
-    rotation = rot;
     cannonRotation = 0;
-    xPos = x;
-    yPos = y;
 }
 
 bool Tank::canShoot()
@@ -53,7 +30,7 @@ void Tank::print()
 {
         glPushMatrix();
             glTranslatef(xPos,yPos,0);
-            glRotatef(-rotation,0,0,1);
+            glRotatef(-angle,0,0,1);
             glPushMatrix();
                 glRotatef(-cannonRotation,0,0,1);
                 glBegin(GL_POLYGON);
@@ -86,41 +63,15 @@ void Tank::print()
         glPopMatrix();
 }
 
-GLfloat Tank::getRotation()
-{
-    return rotation;
-}
-
-void Tank::setRotation(GLfloat value)
-{
-    rotation = value;
-}
-
-void Tank::setPos(GLfloat x, GLfloat y)
-{
-    xPos = x;
-    yPos = y;
-}
-
 void Tank::move(GLfloat speed)
 {
-    xPos += sin(rotation*M_PI/180)*speed;
-    yPos += cos(rotation*M_PI/180)*speed;
+    xPos += sin(angle*M_PI/180)*speed;
+    yPos += cos(angle*M_PI/180)*speed;
 }
 
 void Tank::rotate(GLfloat value)
 {
-    rotation = (int)(rotation + value)%360;
-}
-
-GLfloat Tank::getXPos()
-{
-    return xPos;
-}
-
-GLfloat Tank::getYPos()
-{
-    return yPos;
+    angle = (int)(angle + value)%360;
 }
 
 GLfloat Tank::getCannonRotation()
@@ -141,8 +92,8 @@ void Tank::rotateCannon(GLfloat value)
 bool Tank::canMove(GLfloat speed, QList<Tank *> tanksList, GLfloat top, GLfloat right, GLfloat bottom, GLfloat left, GLfloat offset)
 {
     GLfloat radius = 0.75;
-    GLfloat xCheck = xPos + sin(rotation*M_PI/180)*speed;
-    GLfloat yCheck = yPos + cos(rotation*M_PI/180)*speed;
+    GLfloat xCheck = xPos + sin(angle*M_PI/180)*speed;
+    GLfloat yCheck = yPos + cos(angle*M_PI/180)*speed;
     for(int i = 0; i < tanksList.size(); ++i)
     {
         int currentId = tanksList.at(i)->id;

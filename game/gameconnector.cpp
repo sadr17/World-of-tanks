@@ -44,7 +44,7 @@ void GameConnector::registerSelf(QString registryAddress)
             return;
 
         connect(this, SIGNAL(updatePosition(float,float,float,float)), this->self, SIGNAL(update(float,float,float,float)));
-        connect(this, SIGNAL(fire(float,float,float)), this->self, SIGNAL(fire(float,float,float)));
+        connect(this, SIGNAL(fire()), this->self, SIGNAL(fire()));
         connect(this, SIGNAL(killed(int)), this->self, SIGNAL(killed(int)));
         emit registered();
     });
@@ -65,8 +65,8 @@ void GameConnector::addReplica(QString loc)
         connect(replica, &PlayerReplica::update, [this, id](float x,float y,float a,float ca) {
                emit updateReplica(id, x, y, a, ca);
         });
-        connect(replica, &PlayerReplica::fire, [this, id](float x,float y,float a) {
-               emit fireReplica(id, x, y, a);
+        connect(replica, &PlayerReplica::fire, [this, id]() {
+               emit fireReplica(id);
         });
         connect(replica, &PlayerReplica::killed, [this, id](int hitId) {
                emit killedReplica(id, hitId);
@@ -84,12 +84,12 @@ void GameConnector::addReplica(QString loc)
 
 void GameConnector::update(Tank *tank)
 {
-    emit updatePosition(tank->getXPos(), tank->getYPos(), tank->getRotation(), tank->getCannonRotation());
+    emit updatePosition(tank->getXPos(), tank->getYPos(), tank->getAngle(), tank->getCannonRotation());
 }
 
-void GameConnector::fire(Missile *missile)
+void GameConnector::fireSlot()
 {
-    emit fire(missile->getXPos(), missile->getYPos(), missile->getAngle());
+    emit fire();
 }
 
 void GameConnector::kill(int hitId, Tank * tank)

@@ -1,6 +1,6 @@
 class Player
 {
     SIGNAL(update(float xPos, float yPos, float rotation, float cannonRotation));
-    SIGNAL(fire(float xPos, float yPos, float angle));
+    SIGNAL(fire());
     SIGNAL(killed(int hitId));
 };

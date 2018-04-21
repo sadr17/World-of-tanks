@@ -2,27 +2,27 @@
 #define DISPLAY_H
 
 #include <QGLWidget>
-#include "tank.h"
-#include "missile.h"
-#include "score.h"
-#include "obstacle.h"
+#include <basemapobject.h>
+#include <score.h>
 
 class Display : public QGLWidget
 {
     Q_OBJECT
 public:
     explicit Display(QWidget *parent = 0);
-    QMap<int, Tank *> playerList;
-    QList<Missile *> missileList;
-    QMap<int, Score *> scoreboard;
-    QList<Obstacle *> map;
     ~Display();
-    GLint mapWidth;
-    GLint mapHeight;
-    GLdouble ammoProgress;
-    int gameTimer;
-    bool gameStatus; // true - playing, false - round finished
-    int playerID;
+
+    void drawObjects();
+    void addMapObject(BaseMapObject * obj);
+    void removeMapObject(BaseMapObject * obj);
+    void setAmmoProgress(float value);
+
+    int getMapWidth();
+    int getMapHeight();
+
+    void setScoreboard(QMap<int, Score*> map);
+    void setPlayerId(int id);
+
 private:
     void paintGL();
     void initializeGL();
@@ -32,6 +32,16 @@ private:
     void drawTimer();
     void drawResults();
     GLfloat bColor[4];
+    QHash<QUuid, BaseMapObject*> objects;
+    QMap<int, Score *> scoreboard;
+
+    GLint mapWidth;
+    GLint mapHeight;
+    GLdouble ammoProgress;
+    int gameTimer;
+    bool gameStatus; // true - playing, false - round finished
+    int playerID;
+
 signals:
 
 public slots:

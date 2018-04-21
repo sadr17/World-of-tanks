@@ -15,7 +15,7 @@ public:
 
     void registerSelf(QString registryAddress);
     void update(Tank *tank);
-    void fire(Missile * missile);
+    void fireSlot();
     void kill(int hitId, Tank * tank);
     int currentPlayerId() {
         return this->playerId;
@@ -23,11 +23,11 @@ public:
 
 signals:
     void updatePosition(float xPos, float yPos, float rotation, float cannonRotation);
-    void fire(float xPos, float yPos, float angle);
+    void fire();
     void killed(int hitId);
 
     void updateReplica(int id, float xPos, float yPos, float rotation, float cannonRotation);
-    void fireReplica(int id, float xPos, float yPos, float angle);
+    void fireReplica(int id);
     void killedReplica(int id, int hitId);
 
     void registered();

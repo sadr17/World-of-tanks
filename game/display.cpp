@@ -1,4 +1,5 @@
 #include "display.h"
+#include <QDebug>
 
 Display::Display(QWidget *parent) :
     QGLWidget(parent)
@@ -13,7 +14,7 @@ Display::Display(QWidget *parent) :
 
     ammoProgress = 1.0;
     gameTimer = 0;
-    gameStatus = false;
+    gameStatus = true;
 }
 
 void Display::resizeGL(int w, int h)
@@ -41,23 +42,59 @@ void Display::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0,0,-10);
-    if (!gameStatus) drawResults();
-    for(int i = map.size() - 1; i >= 0; --i)
-    {
-        map[i]->print();
-    }
-    for(int i = playerList.keys().size() - 1; i >= 0; --i)
-    {
-        int key = playerList.keys()[i];
-        playerList[key]->print();
-    }
-    for(int i = missileList.size() - 1; i >= 0; --i)
-    {
-        missileList[i]->print();
-    }
+
+    if (!gameStatus)
+        drawResults();
+
+    drawObjects();
     drawHudBar();
     drawSmallScoreboard();
     drawTimer();
+}
+
+void Display::drawObjects()
+{
+    for(int i = objects.size() - 1; i >=0; i--) {
+        auto key = objects.keys().at(i);
+        objects.value(key)->print();
+    }
+}
+
+void Display::addMapObject(BaseMapObject *obj)
+{
+    this->objects[obj->getUid()] = obj;
+}
+
+void Display::removeMapObject(BaseMapObject *obj)
+{
+    if(this->objects.contains(obj->getUid())) {
+        this->objects.remove(obj->getUid());
+    }
+}
+
+void Display::setAmmoProgress(float value)
+{
+    this->ammoProgress = value;
+}
+
+int Display::getMapWidth()
+{
+    return this->mapWidth;
+}
+
+int Display::getMapHeight()
+{
+    return this->mapHeight;
+}
+
+void Display::setScoreboard(QMap<int, Score *> map)
+{
+    this->scoreboard = map;
+}
+
+void Display::setPlayerId(int id)
+{
+    this->playerID = id;
 }
 
 void Display::drawHudBar()
@@ -114,17 +151,17 @@ void Display::drawSmallScoreboard()
 void Display::drawResults()
 {
     QFont font("Arial", 20, QFont::Light, false);
-    int winner = 0;
-    for(int i = 1; i < playerList.size(); ++i)
-    {
-        int id = scoreboard.keys()[i];
-        if(scoreboard[id]->getKills() > scoreboard[winner]->getKills())
-        {
-            winner = id;
-        }
-    }
+//    int winner = 0;
+//    for(int i = 1; i < playerList.size(); ++i)
+//    {
+//        int id = scoreboard.keys()[i];
+//        if(scoreboard[id]->getKills() > scoreboard[winner]->getKills())
+//        {
+//            winner = id;
+//        }
+//    }
     qglColor(Qt::white);
-    renderText(-4.0, 15.0, -4, "Scoreboard: " + QString::number(winner + 1), font);
+    renderText(-4.0, 15.0, -4, "Scoreboard: " + QString::number(0), font);
     glBegin(GL_POLYGON);
     glColor4f(0.0, 0.0, 0.0, 0.7);
     glVertex2f(-30.0, 17.0);
@@ -136,8 +173,6 @@ void Display::drawResults()
 
 Display::~Display()
 {
-    qDeleteAll(this->playerList);
-    qDeleteAll(this->missileList);
+    qDeleteAll(this->objects);
     qDeleteAll(this->scoreboard);
-    qDeleteAll(this->map);
 }
