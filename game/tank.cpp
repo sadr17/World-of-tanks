@@ -107,6 +107,16 @@ bool Tank::canMove(GLfloat speed, QList<Tank *> tanksList, GLfloat top, GLfloat 
         }
     }
 
+//    for(int i = 0; i < map.size(); ++i)
+//    {
+//        GLfloat xVector = xCheck - map.at(i)->getXPos();
+//        GLfloat yVector = yCheck - map.at(i)->getYPos();
+//        GLfloat vector = sqrt(xVector*xVector + yVector*yVector);
+//        if(vector <= radius + map.at(i)->getAngle())
+//            return false;
+//    }
+
+
     return xCheck > (left + offset) && xCheck < (right - offset) && yCheck > (bottom + offset) && yCheck < (top - offset);
 }
 

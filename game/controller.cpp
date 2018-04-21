@@ -91,9 +91,9 @@ void Controller::setMapSize(float width, float height)
 
 void Controller::initMap()
 {
-    map.append(new Obstacle(-18, -8, 5, this));
-    map.append(new Obstacle(-8, -2, 2, this));
-    map.append(new Obstacle(14, -5, 4.8, this));
+    map.append(new Obstacle(-19, -5, 5, this));
+    map.append(new Obstacle(-2, -1, 2, this));
+    map.append(new Obstacle(14, -5, 3.8, this));
     map.append(new Obstacle(11, 13, 3, this));
     map.append(new Obstacle(-9, 9.9, 3.9, this));
 
@@ -139,28 +139,28 @@ QMap<QString, double> Controller::getRandomPos()
     switch(randomId)
     {
     case 0:
-        xHigh = 0;
-        xLow = -15;
+        xHigh = -18;
+        xLow = -mapWidth / 2.2;
         yHigh = 15;
         yLow = 0;
         break;
     case 1:
-        xHigh = 15;
-        xLow = 0;
-        yHigh = 15;
-        yLow = 0;
+        xHigh = mapWidth / 2.2;
+        xLow = 18;
+        yHigh = mapHeight / 2.2;
+        yLow = 5;
         break;
     case 2:
-        xHigh = 15;
-        xLow = 0;
-        yHigh = 0;
-        yLow = -15;
+        xHigh = mapWidth / 2.2;
+        xLow = 19;
+        yHigh = -4.5;
+        yLow = -mapHeight / 2.3;
         break;
     case 3:
-        xHigh = 0;
-        xLow = -15;
-        yHigh = 0;
-        yLow = -15;
+        xHigh = -10;
+        xLow = -mapWidth / 2.2;
+        yHigh = -11;
+        yLow = -mapHeight / 2.3;
         break;
     }
 
@@ -205,8 +205,6 @@ void Controller::killedReplica(int id, int hitId)
 
 void Controller::handleMissiles()
 {
-    if(!this->missiles.isEmpty())
-    {
         for(int i = this->missiles.size()-1; i >= 0; --i)
         {
             int tankID = this->missiles[i]->hit(this->players.values());
@@ -228,16 +226,13 @@ void Controller::handleMissiles()
                 this->game->kill(tankHitId, this->players[tankID]);
             }
             if(this->missiles[i]->canMove(18, 32, -16.8, -32, map))
-            {
                this->missiles[i]->move();
-            }
             else
             {
                auto missile = this->missiles.takeAt(i);
                emit mapObjectRemoved(missile);
             }
         }
-    }
 }
 
 void Controller::handleAmmoProgress()
