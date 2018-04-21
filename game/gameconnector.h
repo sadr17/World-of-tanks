@@ -7,24 +7,16 @@
 #include "../build-game/rep_player_source.h"
 #include "missile.h"
 
-
-/**
- * @brief The Game class
- *
- * 1. User starts the game
- * - create Player source and publish
- * - get list of players from the registration service
- */
-class Game : public QObject
+class GameConnector : public QObject
 {
     Q_OBJECT
 public:
-    explicit Game(QObject *parent = nullptr);
+    explicit GameConnector(QObject *parent = nullptr);
 
     void registerSelf(QString registryAddress);
     void update(Tank *tank);
     void fire(Missile * missile);
-    void meKilled(int hitId, Tank * tank);
+    void kill(int hitId, Tank * tank);
     int currentPlayerId() {
         return this->playerId;
     }

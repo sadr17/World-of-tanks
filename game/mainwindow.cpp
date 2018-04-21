@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setSizePolicy(qsp);
     setCentralWidget(ui->widget);
     this->setFixedSize(1152,720);
-
-    keyUp = keyDown = keyLeft = keyRight = keyE = keyQ = keySpace = false;
     playerID = 0;
 
     connectBox();
@@ -37,13 +35,12 @@ void MainWindow::setupMap()
 
 void MainWindow::initPlayer()
 {
-    qsrand(this->playerID);
-    int randomId = qrand() % 4;
+    auto position = this->getRandomPos();
     ui->widget->playerID = playerID;
     ui->widget->playerList[playerID] = new Tank(playerID,
-            defaultPosTab[randomId][0],
-            defaultPosTab[randomId][1],
-            defaultPosTab[randomId][2],
+            position.value(QString("xPos")),
+            position.value(QString("yPos")),
+            position.value(QString("rot")),
             this);
     ui->widget->playerList[playerID]->setColor(82, 122, 22);
     ui->widget->playerList[playerID]->setCannonColor(43, 69, 5);
@@ -64,81 +61,59 @@ void MainWindow::initTimer()
     mtON = false;
 }
 
-void MainWindow::setDefaultPos()
+QMap<QString, double> MainWindow::getRandomPos()
 {
-    defaultPosTab[0][0] = -15; // xPos
-    defaultPosTab[0][1] = 15; // yPos
-    defaultPosTab[0][2] = 140; // rot
+    int randomId = this->playerID % 4;
 
-    defaultPosTab[1][0] = 15;
-    defaultPosTab[1][1] = 15;
-    defaultPosTab[1][2] = 210;
+    int xHigh, xLow, yHigh, yLow;
+    int rHigh = 320;
+    int rLow = 50;
+    switch(randomId)
+    {
+    case 0:
+        xHigh = 0;
+        xLow = -15;
+        yHigh = 15;
+        yLow = 0;
+        break;
+    case 1:
+        xHigh = 15;
+        xLow = 0;
+        yHigh = 15;
+        yLow = 0;
+        break;
+    case 2:
+        xHigh = 15;
+        xLow = 0;
+        yHigh = 0;
+        yLow = -15;
+        break;
+    case 3:
+        xHigh = 0;
+        xLow = -15;
+        yHigh = 0;
+        yLow = -15;
+        break;
+    }
 
-    defaultPosTab[2][0] = 15;
-    defaultPosTab[2][1] = -15;
-    defaultPosTab[2][2] = 320;
-
-    defaultPosTab[3][0] = -15;
-    defaultPosTab[3][1] = -15;
-    defaultPosTab[3][2] = 50;
+    qsrand(QDateTime::currentDateTime().time().msec());
+    QString xPos("xPos"), yPos("yPos"), rot("rot");
+    QMap<QString, double> result;
+    result[xPos] = qrand() % ((xHigh + 1) - xLow) + xLow;;
+    result[yPos] = qrand() % ((yHigh + 1) - yLow) + yLow;
+    result[rot] = qrand() % ((rHigh + 1) - rLow) + rLow;
+    return result;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-
-    switch(event->key())
-    {
-        case Qt::Key_Up:
-            keyUp = true;
-            break;
-        case Qt::Key_Down:
-            keyDown = true;
-            break;
-        case Qt::Key_Left:
-            keyLeft = true;
-            break;
-        case Qt::Key_Right:
-            keyRight = true;
-            break;
-        case Qt::Key_E:
-            keyE = true;
-            break;
-        case Qt::Key_Q:
-            keyQ = true;
-            break;
-        case Qt::Key_Space:
-            keySpace = true;
-            break;
-    }
+    this->keys[event->key()] = true;
     QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
-    switch(event->key())
-    {
-        case Qt::Key_Up:
-            keyUp = false;
-            break;
-        case Qt::Key_Down:
-            keyDown = false;
-            break;
-        case Qt::Key_Left:
-            keyLeft = false;
-            break;
-        case Qt::Key_Right:
-            keyRight = false;
-            break;
-        case Qt::Key_E:
-            keyE = false;
-            break;
-        case Qt::Key_Q:
-            keyQ = false;
-            break;
-        case Qt::Key_Space:
-            keySpace = false;
-            break;
-    }
+    this->keys[event->key()] = false;
     QMainWindow::keyReleaseEvent(event);
 }
 
@@ -154,54 +129,50 @@ void MainWindow::fire()
 
 void MainWindow::movePlayer()
 {
-    bool moving = false;
-    bool shooting = false;
-    if(keyUp)
-    {
+    foreach(auto key, this->keys.keys()) {
+     if (!this->keys[key])
+         continue;
+
+     if(key == Qt::Key_Up)
+     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(0.10, ui->widget->playerList.values(), &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(0.10, ui->widget->playerList.values(), mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(0.10);
-        moving = true;
-    }
-    else if(keyDown)
-    {
+     }
+     else if(key == Qt::Key_Down)
+     {
         GLint mapWidth = (ui->widget->mapWidth)/2;
         GLint mapHeight = (ui->widget->mapHeight)/2;
-        if(ui->widget->playerList[playerID]->canMove(-0.05, ui->widget->playerList.values(), &ui->widget->map, mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
+        if(ui->widget->playerList[playerID]->canMove(-0.05, ui->widget->playerList.values(), mapHeight, mapWidth, -mapHeight+1.2, -mapWidth, 1.5))
             ui->widget->playerList[playerID]->move(-0.05);
-        moving = true;
-    }
-    if(keyLeft)
-    {
+     }
+     if(key == Qt::Key_Left)
+     {
         ui->widget->playerList[playerID]->rotate(-2);
-        moving = true;
-    }
-    else if(keyRight)
-    {
+     }
+     else if(key == Qt::Key_Right)
+     {
         ui->widget->playerList[playerID]->rotate(2);
-        moving = true;
-    }
-    if(keyE)
-    {
+     }
+     if(key == Qt::Key_E)
+     {
         ui->widget->playerList[playerID]->rotateCannon(1);
-        moving = true;
-    }
-    else if(keyQ)
-    {
+     }
+     else if(key == Qt::Key_Q)
+     {
         ui->widget->playerList[playerID]->rotateCannon(-1);
-        moving = true;
-    }
-    if(keySpace)
-    {
+     }
+     if(key == Qt::Key_Space)
+     {
         if(ui->widget->playerList[playerID]->canShoot())
         {
             this->fire();
             ui->widget->ammoProgress = 0;
             ui->widget->playerList[playerID]->canShoot(false);
             mtON = true;
-            shooting = true;
         }
+     }
     }
 
     this->game->update(ui->widget->playerList[playerID]);
@@ -215,26 +186,25 @@ void MainWindow::connectBox()
                                                    tr("Enter address of node"),
                                                    QLineEdit::Normal,
                                                    Utils::getCurrentIpAddress(), &ok);
-    this->game = new Game(this);
+    this->game = new GameConnector(this);
     if (ok && !connectionData.isEmpty())
     {
         this->game->registerSelf(connectionData);
-        connect(this->game, &Game::registered, [this](){
+        connect(this->game, &GameConnector::registered, [this](){
             this->playerID = this->game->currentPlayerId();
 
             this->setupMap();
-            this->setDefaultPos();
             this->initPlayer();
             this->initTimer();
 
             connect(this->game, SIGNAL(updateReplica(int, float,float,float,float)), this, SLOT(updateReplica(int, float, float, float, float)));
             connect(this->game, SIGNAL(fireReplica(int,float,float,float)), SLOT(fireReplica(int, float, float, float)));
             connect(this->game, SIGNAL(killedReplica(int, int)), SLOT(killedReplica(int, int)));
-            connect(this->game, &Game::replicaAdded, [this]() {
+            connect(this->game, &GameConnector::replicaAdded, [this]() {
                 this->game->update(ui->widget->playerList[playerID]);
             });
 
-            connect(this->game, &Game::replicaRemoved, [this](int id){
+            connect(this->game, &GameConnector::replicaRemoved, [this](int id){
                if (ui->widget->playerList.contains(id))
                     ui->widget->playerList.remove(id);
 
@@ -286,12 +256,11 @@ void MainWindow::handleMissiles()
             if (tankID >= 0 && tankID == this->playerID)
             {
                 int tankHitId = ui->widget->missileList[i]->tankID;
-                qsrand(this->playerID);
-                int randomId = qrand() % 4;
+                auto position = this->getRandomPos();
 
-                ui->widget->playerList[tankID]->setRotation(defaultPosTab[randomId][3]);
+                ui->widget->playerList[tankID]->setRotation(position.value(QString("rot")));
                 ui->widget->playerList[tankID]->setCannonRotation(0);
-                ui->widget->playerList[tankID]->setPos(defaultPosTab[randomId][0], defaultPosTab[randomId][1]);
+                ui->widget->playerList[tankID]->setPos(position.value(QString("xPos")), position.value(QString("yPos")));
 
                 int death = ui->widget->scoreboard[tankID]->getDeaths();
                 ui->widget->scoreboard[tankID]->setDeaths(++death);
@@ -299,7 +268,7 @@ void MainWindow::handleMissiles()
                 int kills = ui->widget->scoreboard[tankHitId]->getKills();
                 ui->widget->scoreboard[tankHitId]->setKills(++kills);
 
-                this->game->meKilled(tankHitId, ui->widget->playerList[tankID]);
+                this->game->kill(tankHitId, ui->widget->playerList[tankID]);
             }
             if(ui->widget->missileList[i]->canMove(18, 32, -16.8, -32, map))
             {

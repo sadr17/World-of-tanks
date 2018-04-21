@@ -1,13 +1,13 @@
-#include "game.h"
+#include "gameconnector.h"
 #include "../common/utils.h"
 #include "../build-game/rep_counter_replica.h"
 
-Game::Game(QObject *parent) : QObject(parent)
+GameConnector::GameConnector(QObject *parent) : QObject(parent)
 {
 
 }
 
-void Game::registerSelf(QString registryAddress)
+void GameConnector::registerSelf(QString registryAddress)
 {
     QString ipAddress = Utils::getCurrentIpAddress();
     qsrand(QDateTime::currentDateTime().time().msec());
@@ -50,7 +50,7 @@ void Game::registerSelf(QString registryAddress)
     });
 }
 
-void Game::addReplica(QString loc)
+void GameConnector::addReplica(QString loc)
 {
     if(loc == QString("Counter"))
         return;
@@ -74,7 +74,7 @@ void Game::addReplica(QString loc)
         connect(replica, &PlayerReplica::initialized, [this](){
                emit replicaAdded();
         });
-        connect(replica, &PlayerReplica::stateChanged, [this, id](QRemoteObjectReplica::State state, QRemoteObjectReplica::State oldState){
+        connect(replica, &PlayerReplica::stateChanged, [this, id](QRemoteObjectReplica::State state){
             if (state == QRemoteObjectReplica::Suspect) {
                 emit replicaRemoved(id);
             }
@@ -82,17 +82,17 @@ void Game::addReplica(QString loc)
     }
 }
 
-void Game::update(Tank *tank)
+void GameConnector::update(Tank *tank)
 {
     emit updatePosition(tank->getXPos(), tank->getYPos(), tank->getRotation(), tank->getCannonRotation());
 }
 
-void Game::fire(Missile *missile)
+void GameConnector::fire(Missile *missile)
 {
     emit fire(missile->getXPos(), missile->getYPos(), missile->getAngle());
 }
 
-void Game::meKilled(int hitId, Tank * tank)
+void GameConnector::kill(int hitId, Tank * tank)
 {
     emit killed(hitId);
     this->update(tank);

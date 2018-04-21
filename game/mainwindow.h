@@ -11,7 +11,7 @@
 #include <QSizePolicy>
 
 #include "obstacle.h"
-#include "game.h"
+#include "gameconnector.h"
 
 namespace Ui {
 class MainWindow;
@@ -40,7 +40,7 @@ private slots:
     void onTimer();
     void setupMap();
     void initPlayer();
-    void setDefaultPos();
+    QMap<QString, double> getRandomPos();
     void fire();
 
 private:
@@ -51,7 +51,7 @@ private:
 
     Ui::MainWindow *ui;
     QTimer timer;
-    Game * game;
+    GameConnector * game;
     int roundTimer;
 
     int mt;
@@ -59,8 +59,7 @@ private:
 
     int playerID;
     int timerInterval;
-    double defaultPosTab[4][3];
-    bool keyUp, keyDown, keyRight, keyLeft, keyQ, keyE, keySpace;
+    QHash<int, bool> keys;
 
     QList<Obstacle *> map;
 

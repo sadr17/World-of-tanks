@@ -25,7 +25,7 @@ SOURCES += main.cpp\
         missile.cpp \
         score.cpp \
         obstacle.cpp \
-        game.cpp
+    gameconnector.cpp
 
 HEADERS  += mainwindow.h \
         display.h \
@@ -33,6 +33,6 @@ HEADERS  += mainwindow.h \
         missile.h \
         score.h \
         obstacle.h \
-        game.h
+    gameconnector.h
 
 FORMS    += mainwindow.ui
